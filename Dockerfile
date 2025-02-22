@@ -2,6 +2,13 @@ FROM node:22-alpine AS base
 
 WORKDIR /app
 
+LABEL maintainer="nonolanlan1007"
+LABEL org.opencontainers.image.title="BoardStack"
+LABEL org.opencontainers.image.description="Open-source Trello alternative to manage your project, organize your tasks, note your ideas and much more!"
+LABEL org.opencontainers.image.source="https://github.com/nonolanlan1007/boardstack"
+LABEL org.opencontainers.image.vendor="nonolanlan1007"
+LABEL org.opencontainers.image.licenses="MIT"
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 FROM base AS build
