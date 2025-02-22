@@ -237,12 +237,12 @@ onMounted(async () => {
       </div>
     </div>
 
-    <BoardManagementDrawer
+    <LazyBoardManagementDrawer
       v-model:show-board-drawer="showBoardDrawer"
       :board="board"
     />
 
-    <CreateCardDialog
+    <LazyCreateCardDialog
       v-model:is-new-card-modal-open="isNewCardModalOpen"
       :board="board"
       :initial-values="createCardInitialValues"
