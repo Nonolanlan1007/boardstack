@@ -35,24 +35,27 @@ const mainMenuItems = computed<MenuItem[]>(() => [
       })),
     key: "boards",
   },
-  boardsStore.boards.filter(
+  ...(boardsStore.boards.filter(
     (board) => user.value && board.owner_id !== user.value.id,
   ).length > 0
-    ? {
-        label: "Shared with you",
-        items: boardsStore.boards
-          .filter((board) => user.value && board.owner_id !== user.value.id)
-          .sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          )
-          .map((board) => ({
-            label: board.title,
-            route: `/app/boards/${board.id}`,
-          })),
-      }
-    : {},
+    ? [
+        {
+          label: "Shared with you",
+          items: boardsStore.boards
+            .filter((board) => user.value && board.owner_id !== user.value.id)
+            .sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime(),
+            )
+            .map((board) => ({
+              label: board.title,
+              route: `/app/boards/${board.id}`,
+            })),
+          key: "shared",
+        },
+      ]
+    : []),
 ]);
 
 function toggleColorMode() {
