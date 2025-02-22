@@ -11,6 +11,9 @@ importers:
       '@adonisjs/env':
         specifier: ^6.1.1
         version: 6.1.1
+      '@formkit/drag-and-drop':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@nuxt/image':
         specifier: ^1.9.0
         version: 1.9.0(db0@0.2.4)(ioredis@5.5.0)(magicast@0.3.5)
@@ -573,6 +576,9 @@ packages:
   '@fastify/accept-negotiator@1.1.0':
     resolution: {integrity: sha512-OIHZrb2ImZ7XG85HXOONLcJWGosv7sIvM2ifAPQVhg9Lv7qdmMBNVaai4QTdyuaqbKM5eO6sLSQOYI7wEQeCJQ==}
     engines: {node: '>=14'}
+
+  '@formkit/drag-and-drop@0.4.0':
+    resolution: {integrity: sha512-lo3CFCmZlt3q+t5r00kauWOkcB5HVONligwEwrwcW4K4vcoRsdjL5sMNXWFyBAI47GzpNSVg09J11ZSauJ8dEA==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -6084,6 +6090,8 @@ snapshots:
 
   '@fastify/accept-negotiator@1.1.0':
     optional: true
+
+  '@formkit/drag-and-drop@0.4.0': {}
 
   '@humanfs/core@0.19.1': {}
 

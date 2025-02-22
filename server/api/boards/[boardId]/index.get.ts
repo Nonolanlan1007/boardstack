@@ -40,10 +40,16 @@ export default defineEventHandler(async (event) => {
             omit: {
               parent_list: true,
             },
+            orderBy: {
+              position: "asc",
+            },
           },
         },
         omit: {
           parent_board: true,
+        },
+        orderBy: {
+          position: "asc",
         },
       },
       invitations: {
