@@ -94,6 +94,7 @@ async function createCard({ states, valid }: FormSubmitEvent) {
               type="text"
               placeholder="My awesome card"
               fluid
+              autofocus
             />
             <Message
               v-if="$form.title?.invalid"
