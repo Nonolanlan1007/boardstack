@@ -22,6 +22,34 @@ export default defineEventHandler(async (event) => {
       statusCode: 401,
     });
 
+  const board = await prisma.boards.findFirst({
+    where: { id: boardId },
+    include: {
+      members: {
+        select: {
+          user_id: true,
+          role: true,
+        },
+      },
+    },
+  });
+
+  if (!board)
+    throw createError({
+      statusCode: 404,
+      message: "Board not found",
+    });
+
+  if (
+    board.owner_id !== user.id &&
+    !board.members.find(
+      (member) => member.user_id === user.id && member.role === "admin",
+    )
+  )
+    throw createError({
+      statusCode: 403,
+    });
+
   const member = await prisma.board_members.findFirst({
     where: { parent_board: boardId, id: memberId },
   });
