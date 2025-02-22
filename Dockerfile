@@ -13,6 +13,10 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
+ENV NUXT_SESSION_PASSWORD="password"
+ENV DATABASE_URL="dburl"
+ENV ENABLE_REGISTRATION=true
+
 RUN pnpm build --preset node-server
 
 FROM base AS final
