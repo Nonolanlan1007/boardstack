@@ -223,38 +223,19 @@ onMounted(async () => {
       v-if="board && board.lists.length > 0"
       class="flex items-start gap-2 overflow-x-scroll"
     >
-      <div
-        v-for="list in board.lists.sort((a, b) => a.position - b.position)"
+      <BoardList
+        v-for="list in board.lists"
         :key="list.id"
-        class="min-w-72 w-72 flex flex-col gap-2"
-        :class="list.hide_when_blank && list.cards.length === 0 ? 'hidden' : ''"
-      >
-        <div class="flex items-center justify-between gap-2 px-2 pt-2">
-          <h2 class="text-lg font-semibold">{{ list.title }}</h2>
-          <IconButton
-            v-if="board.current_user_role !== 'reader'"
-            icon="pi pi-plus"
-            @click="
-              () => {
-                createCardInitialValues = { parentList: list.id };
-                isNewCardModalOpen = true;
-              }
-            "
-          />
-        </div>
-        <div
-          class="flex items-center flex-col gap-2 overflow-y-auto max-h-[calc(100vh-200px)]"
-        >
-          <BoardCard
-            v-for="card in list.cards
-              .filter((c) => !searchQuery || c.title.includes(searchQuery))
-              .sort((a, b) => a.position - b.position)"
-            :key="card.id"
-            :card="card"
-            :parent-board="board"
-          />
-        </div>
-      </div>
+        :list="list"
+        :search-query="searchQuery"
+        :parent-board="board"
+        @create-card="
+          () => {
+            createCardInitialValues = { parentList: list.id };
+            isNewCardModalOpen = true;
+          }
+        "
+      />
     </div>
     <div
       v-else-if="board"
