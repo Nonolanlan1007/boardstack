@@ -345,7 +345,16 @@ async function updateInvitation(invitationId: string, role: string) {
     v-model:visible="showBoardDrawer"
     position="right"
     class="!w-full md:!w-80 lg:!w-[30rem]"
-    @hide="boardDrawerStep = 0"
+    @hide="
+      () => {
+        boardDrawerStep = 0;
+        unsplashQuery = '';
+        unsplashResults = {
+          query: '',
+          results: [],
+        };
+      }
+    "
   >
     <template #header>
       <Button
@@ -516,6 +525,7 @@ async function updateInvitation(invitationId: string, role: string) {
             placeholder="Search on Unsplash"
             fluid
             @focusout="unsplashSearch"
+            @keyup.enter="unsplashSearch"
           />
           <InputIcon v-if="!isLoading" class="pi pi-search" />
           <InputIcon v-else class="pi pi-spin pi-spinner" />
