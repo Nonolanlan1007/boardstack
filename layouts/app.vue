@@ -349,7 +349,7 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
             label="Back"
             variant="outlined"
             class="w-full md:w-min"
-            :loading="isLoading"
+            :disabled="isLoading"
             @click="step = 0"
           />
           <Button
