@@ -6,11 +6,14 @@ const emit = defineEmits(["submit"]);
 model.value = props.defaultValue || "";
 const oldValue = ref<string>(model.value);
 
-function focusout() {
+function submit() {
   model.value = model.value!.trim();
   if (model.value === oldValue.value) return;
   if (model.value === "") model.value = oldValue.value;
-  else emit("submit", model.value);
+  else {
+    emit("submit", model.value);
+    oldValue.value = model.value;
+  }
 }
 </script>
 
@@ -25,6 +28,7 @@ function focusout() {
       )
     "
     :maxlength="20"
-    @focusout="focusout"
+    @focusout="submit"
+    @keyup.enter="submit"
   />
 </template>
