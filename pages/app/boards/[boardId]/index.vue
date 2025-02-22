@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import IconButton from "~/components/IconButton.vue";
 import type { MenuItem } from "primevue/menuitem";
-import CreateCardDialog from "~/components/CreateCardDialog.vue";
 import type { BoardCard, BoardMember } from "~/utils/types";
-import type { board_labels, board_invitations } from "@prisma/client";
+import type {
+  board_lists,
+  board_labels,
+  board_invitations,
+} from "@prisma/client";
 
 definePageMeta({
   middleware: "auth-only",
@@ -32,6 +35,7 @@ const board = computed(() => {
   return currentBoard;
 });
 const isNewCardModalOpen = ref<boolean>(false);
+const isNewListModalOpen = ref<boolean>(false);
 const createCardInitialValues = ref<{ parentList: string }>({ parentList: "" });
 const createMenu = ref();
 const createMenuItems = ref<MenuItem[]>([
@@ -40,6 +44,9 @@ const createMenuItems = ref<MenuItem[]>([
     items: [
       {
         label: "List",
+        command: () => {
+          isNewListModalOpen.value = true;
+        },
       },
       {
         label: "Card",
@@ -165,6 +172,16 @@ onMounted(async () => {
         });
         break;
       }
+      case "list_created": {
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+        currentBoard.lists.push({
+          ...(message.data as board_lists),
+          cards: [],
+        } as BoardList);
+        break;
+      }
     }
   };
 
@@ -202,7 +219,10 @@ onMounted(async () => {
       </div>
     </div>
     <Divider />
-    <div v-if="board" class="flex items-start gap-2 overflow-x-scroll">
+    <div
+      v-if="board && board.lists.length > 0"
+      class="flex items-start gap-2 overflow-x-scroll"
+    >
       <div
         v-for="list in board.lists.sort((a, b) => a.position - b.position)"
         :key="list.id"
@@ -236,6 +256,22 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    <div
+      v-else-if="board"
+      class="flex justify-center items-center flex-col gap-4 my-32 lg:my-72"
+    >
+      <p class="text-center">It's a bit empty here...</p>
+      <Button
+        v-if="board.current_user_role !== 'reader'"
+        icon="pi pi-plus"
+        label="Create list"
+        @click="
+          () => {
+            isNewListModalOpen = true;
+          }
+        "
+      />
+    </div>
 
     <LazyBoardManagementDrawer
       v-model:show-board-drawer="showBoardDrawer"
@@ -246,6 +282,11 @@ onMounted(async () => {
       v-model:is-new-card-modal-open="isNewCardModalOpen"
       :board="board"
       :initial-values="createCardInitialValues"
+    />
+
+    <LazyCreateListDialog
+      v-model:is-new-list-modal-open="isNewListModalOpen"
+      :board="board"
     />
 
     <Menu
