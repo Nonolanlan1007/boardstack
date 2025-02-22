@@ -143,7 +143,7 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
     }
 
     isLoading.value = true;
-    await boardsStore.fetchBoards();
+    await boardsStore.fetchBoards(user.value!);
     isLoading.value = false;
     isNewBoardModalOpen.value = false;
     step.value = 0;
