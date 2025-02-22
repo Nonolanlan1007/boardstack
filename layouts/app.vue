@@ -145,11 +145,15 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
       });
     }
 
+    const boardData = await res.json();
+
     isLoading.value = true;
     await boardsStore.fetchBoards(user.value!);
     isLoading.value = false;
     isNewBoardModalOpen.value = false;
     step.value = 0;
+
+    navigateTo(`/app/boards/${boardData.id}`);
   }
 }
 </script>
