@@ -1,0 +1,21 @@
+services:
+  app:
+    image: boardstack:latest
+    container_name: boardstack
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "mysql://root:example@db:3306/boardstack"
+      ENABLE_REGISTRATION: true
+      NUXT_SESSION_PASSWORD: "oxw8q4e0B1ieR/XBLttveU1ScT4rYIhMrRtDIuw04yw=" # Change this with a 32 characters key
+    restart: unless-stopped
+
+  db:
+    image: mariadb
+    container_name: boardstack-db
+    environment:
+      MARIADB_ROOT_PASSWORD: example # Change this with a secure password
+      DB_DATABASE: boardstack
+    restart: unless-stopped
+    volumes:
+      - ./boardstack-db:/var/lib/mysql

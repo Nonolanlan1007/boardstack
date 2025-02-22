@@ -1,0 +1,119 @@
+<mjml lang="en">
+  <mj-head>
+    <mj-raw>
+      <meta name="color-scheme" content="light dark">
+      <meta name="supported-color-schemes" content="light dark">
+    </mj-raw>
+    <mj-style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        background-color: #f1f1f1 !important;
+        color: #000000 !important;
+      }
+
+      h1, h2, h3, p {
+        color: #000000 !important;
+      }
+
+      .dark_img {
+        display: none !important;
+      }
+
+      .btn-outlined {
+        color: #000 !important;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1a1a1a !important;
+          color: #ffffff !important;
+        }
+
+        h1, h2, h3, p {
+          color: #f1f1f1 !important;
+        }
+
+        .dark_img {
+          display: block !important;
+        }
+
+        .light_img {
+          display: none !important;
+        }
+
+        .btn-outlined {
+          color: #fff !important;
+        }
+      }
+    </mj-style>
+    <mj-title>{{user}} invited to join {{boardName}} on BoardStack</mj-title>
+  </mj-head>
+
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image src="http://{{host}}/long_logo_dark.png" alt="Logo" css-class="dark_img" />
+        <mj-image src="http://{{host}}/long_logo_light.png" alt="Logo" css-class="light_img" />
+      </mj-column>
+    </mj-section>
+
+    <mj-raw>
+      <hr />
+    </mj-raw>
+
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="32px" font-weight="700">
+          {{user}} invited you to collaborate on BoardStack!
+        </mj-text>
+
+        <mj-text>
+          You receive this email because <strong>{{user}}</strong> sent you an invitation to join <strong>{{boardName}}</strong> on BoardStack.
+        </mj-text>
+
+        <mj-text>
+          You will join this board as {{role}}, so you can
+          <strong>
+            {{permissions}}
+          </strong>
+          it. {{user}} will only be able to see your avatar and your username.
+        </mj-text>
+
+        <mj-text>
+          You can ignore this email to decline the invitation or
+          <strong> click the button below </strong> to sign in and accept it.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column width="100%">
+        <mj-button
+          href="http://{{host}}/app/invitations/{{invitationId}}"
+          background-color="#34D399"
+          width="100%"
+        >
+          Accept Invitation
+        </mj-button>
+
+        <mj-button
+          href="http://{{host}}"
+          width="100%"
+        >
+          Create my board on BoardStack
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="8px" align="center">
+          BoardStack - @ 2023-2025 All rights reserved
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

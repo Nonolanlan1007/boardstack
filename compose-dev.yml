@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      tags: ['boardstack:dev']
+    container_name: boardstack
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  db:
+    image: mariadb
+    container_name: boardstack-db
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      DB_DATABASE: boardstack
+    restart: unless-stopped
+    volumes:
+      - ./boardstack-db:/var/lib/mysql
