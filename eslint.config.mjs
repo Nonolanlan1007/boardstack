@@ -6,6 +6,12 @@ export default withNuxt([
   {
     rules: {
       "vue/html-self-closing": "off",
+      "prettier/prettier": [
+        "error",
+        {
+          endOfLine: "auto",
+        },
+      ],
     },
   },
   {
