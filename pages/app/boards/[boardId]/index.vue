@@ -7,6 +7,7 @@ import type {
   board_labels,
   board_invitations,
 } from "@prisma/client";
+import updateCardPosition from "~/utils/updateCardPosition";
 
 definePageMeta({
   middleware: "auth-only",
@@ -89,6 +90,16 @@ onMounted(async () => {
         ).lists
           .find((l) => l.id === (message.data as BoardCard).parent_list)!
           .cards.push(message.data as BoardCard);
+        break;
+      }
+      case "card_updated": {
+        const updatedCard = message.data as BoardCard;
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+
+        currentBoard.lists = updateCardPosition(updatedCard, currentBoard);
+
         break;
       }
       case "label_updated": {

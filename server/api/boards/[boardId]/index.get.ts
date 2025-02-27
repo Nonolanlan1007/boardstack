@@ -37,9 +37,6 @@ export default defineEventHandler(async (event) => {
                 },
               },
             },
-            omit: {
-              parent_list: true,
-            },
             orderBy: {
               position: "asc",
             },
