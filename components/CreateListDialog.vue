@@ -17,7 +17,7 @@ function createListResolver({ values }: FormSubmitEvent) {
   return { errors };
 }
 
-async function createCard({ states, valid }: FormSubmitEvent) {
+async function createList({ states, valid }: FormSubmitEvent) {
   if (valid) {
     isLoading.value = true;
     const res = await fetch(
@@ -69,7 +69,7 @@ async function createCard({ states, valid }: FormSubmitEvent) {
       v-slot="$form"
       class="flex flex-col justify-center items-center gap-2 w-full"
       :resolver="createListResolver"
-      @submit="createCard"
+      @submit="createList"
     >
       <div class="flex flex-col gap-1 w-full mb-2">
         <label for="title">Title</label>
