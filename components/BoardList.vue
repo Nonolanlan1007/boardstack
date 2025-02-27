@@ -101,7 +101,12 @@ async function onCardDrop(event: VueDndDropEvent) {
       @drag-start="(e) => console.log('drag start', e)"
       @drag-end="(e) => console.log('drag end', e)"
     >
-      <Draggable v-for="card in list.cards" :key="card.id" class="w-full">
+      <Draggable
+        v-for="card in list.cards"
+        :key="card.id"
+        class="w-full"
+        :drag-not-allowed="parentBoard.current_user_role === 'reader'"
+      >
         <BoardCard :card="card" :parent-board="parentBoard" />
       </Draggable>
     </Container>
