@@ -8,6 +8,7 @@ import type {
   board_invitations,
 } from "@prisma/client";
 import updateCardPosition from "~/utils/updateCardPosition";
+import getUserRole from "~/utils/getUserRole";
 
 definePageMeta({
   middleware: "auth-only",
@@ -181,6 +182,27 @@ onMounted(async () => {
           detail: `${(message.data as BoardMember).full_name} just joined the board!`,
           life: 5000,
         });
+        break;
+      }
+      case "member_updated": {
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+
+        const updatedMember = message.data as BoardMember;
+        const memberIndex = currentBoard.invitations.findIndex(
+          (l) => l.id === updatedMember.id,
+        );
+        currentBoard.members[memberIndex] = updatedMember;
+        break;
+      }
+      case "member_deleted": {
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+        currentBoard.members = currentBoard.members.filter(
+          (member) => member.id !== (message.data as string),
+        ) as BoardMember[];
         break;
       }
       case "list_created": {

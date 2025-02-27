@@ -57,7 +57,6 @@ export default defineEventHandler(async (event) => {
       members: {
         omit: {
           parent_board: true,
-          id: true,
         },
         include: {
           users: {
@@ -263,6 +262,13 @@ defineRouteMeta({
                     items: {
                       type: "object",
                       properties: {
+                        id: {
+                          type: "string",
+                          format: "uuid",
+                          description:
+                            "The id of the member (not the same as the user)",
+                          example: "13jc72b5-856l-48cd-9652-2e88a23aoi98",
+                        },
                         user_id: {
                           type: "string",
                           format: "uuid",
