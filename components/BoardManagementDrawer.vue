@@ -145,7 +145,7 @@ async function updateLabel({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         label: field === "label" ? newValue : undefined,
-        color: field === "color" ? `#${data[field]}` : undefined,
+        color: field === "color" ? data[field] : undefined,
       }),
     },
   ).catch((res) => res);
@@ -179,7 +179,7 @@ async function createLabel({ valid, states }: FormSubmitEvent) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       label: states.label.value,
-      color: states.color.value || "#FF0000",
+      color: states.color.value || "FF0000",
     }),
   }).catch((res) => res);
   isLoading.value = false;
