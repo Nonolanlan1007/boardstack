@@ -8,7 +8,6 @@ import type {
   board_invitations,
 } from "@prisma/client";
 import updateCardPosition from "~/utils/updateCardPosition";
-import getUserRole from "~/utils/getUserRole";
 
 definePageMeta({
   middleware: "auth-only",
