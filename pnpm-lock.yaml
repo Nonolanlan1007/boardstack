@@ -11,9 +11,6 @@ importers:
       '@adonisjs/env':
         specifier: ^6.1.1
         version: 6.1.1
-      '@formkit/drag-and-drop':
-        specifier: ^0.4.0
-        version: 0.4.0
       '@nuxt/image':
         specifier: ^1.9.0
         version: 1.9.0(db0@0.2.4)(ioredis@5.5.0)(magicast@0.3.5)
@@ -89,6 +86,9 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
+      vue-dndrop:
+        specifier: ^1.3.5
+        version: 1.3.5
       vue3-lottie:
         specifier: ^3.3.1
         version: 3.3.1(vue@3.5.13(typescript@5.7.3))
@@ -576,9 +576,6 @@ packages:
   '@fastify/accept-negotiator@1.1.0':
     resolution: {integrity: sha512-OIHZrb2ImZ7XG85HXOONLcJWGosv7sIvM2ifAPQVhg9Lv7qdmMBNVaai4QTdyuaqbKM5eO6sLSQOYI7wEQeCJQ==}
     engines: {node: '>=14'}
-
-  '@formkit/drag-and-drop@0.4.0':
-    resolution: {integrity: sha512-lo3CFCmZlt3q+t5r00kauWOkcB5HVONligwEwrwcW4K4vcoRsdjL5sMNXWFyBAI47GzpNSVg09J11ZSauJ8dEA==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -5519,6 +5516,9 @@ packages:
   vue-devtools-stub@0.1.0:
     resolution: {integrity: sha512-RutnB7X8c5hjq39NceArgXg28WZtZpGc3+J16ljMiYnFhKvd8hITxSWQSQ5bvldxMDU6gG5mkxl1MTQLXckVSQ==}
 
+  vue-dndrop@1.3.5:
+    resolution: {integrity: sha512-7oMGTm1d8BzqWb1uHRTtYLTX0D2uAZPhVq9S7EOJVmQdooSchloUS/OK68uRTic8dmLRJDdQhCZnYzDr5XJ53Q==}
+
   vue-eslint-parser@9.4.3:
     resolution: {integrity: sha512-2rYRLWlIpaiN8xbPiDyXZXRgLGOtWxERV7ND5fFAv5qo1D2N9Fu9MNajBNc6o13lZ+24DAWCkQCvj4klgmcITg==}
     engines: {node: ^14.17.0 || >=16.0.0}
@@ -6090,8 +6090,6 @@ snapshots:
 
   '@fastify/accept-negotiator@1.1.0':
     optional: true
-
-  '@formkit/drag-and-drop@0.4.0': {}
 
   '@humanfs/core@0.19.1': {}
 
@@ -12013,6 +12011,8 @@ snapshots:
       ufo: 1.5.4
 
   vue-devtools-stub@0.1.0: {}
+
+  vue-dndrop@1.3.5: {}
 
   vue-eslint-parser@9.4.3(eslint@9.20.1(jiti@2.4.2)):
     dependencies:

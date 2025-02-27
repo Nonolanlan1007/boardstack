@@ -7,6 +7,8 @@ const props = defineProps<{
   parentBoard: DetailedBoard;
 }>();
 
+const toast = useToast();
+
 const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
 
@@ -35,6 +37,7 @@ const contextMenuItems = computed((): MenuItem[] => [
       .sort((a, b) => a.position - b.position)
       .map((list) => ({
         label: list.title,
+        command: () => moveCard(list.id),
       })),
   },
   {
@@ -51,11 +54,42 @@ const isLoading = ref<boolean>(false);
 function onCardRightClick(event: Event) {
   contextMenu.value.show(event);
 }
+
+async function moveCard(newParentList: string) {
+  const newPos =
+    props.parentBoard.lists.find((l) => l.id === newParentList)!.cards.length +
+    1;
+
+  if (props.card.parent_list === newParentList) return;
+
+  const res = await fetch(
+    `/api/boards/${props.parentBoard.id}/cards/${props.card.id}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parent_list: newParentList,
+        position: newPos,
+      }),
+    },
+  ).catch((res) => res);
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+}
 </script>
 
 <template>
   <Card
-    class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none"
+    class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none board-card"
     unstyled
     @contextmenu="onCardRightClick($event)"
   >
