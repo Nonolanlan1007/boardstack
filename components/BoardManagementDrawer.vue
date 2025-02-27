@@ -338,6 +338,75 @@ async function updateInvitation(invitationId: string, role: string) {
     life: 3000,
   });
 }
+
+async function updateMember(memberId: string, role: string) {
+  if (
+    role === props.board.members.find((member) => member.id === memberId)!.role
+  )
+    return;
+
+  toast.add({
+    severity: "info",
+    summary: "Loading",
+    detail: "Updating invitation...",
+    closable: false,
+  });
+
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/members/${memberId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    },
+  ).catch((res) => res);
+  toast.removeAllGroups();
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: "Member updated",
+    life: 3000,
+  });
+}
+
+async function deleteMember(memberId: string) {
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/members/${memberId}`,
+    {
+      method: "DELETE",
+    },
+  ).catch((res) => res);
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: "Member kicked",
+    life: 3000,
+  });
+}
 </script>
 
 <template>
@@ -775,25 +844,17 @@ async function updateInvitation(invitationId: string, role: string) {
           class="flex flex-col gap-2 w-full"
         >
           <div
-            v-for="(invitation, i) in [...board.invitations, ...board.members]"
-            :key="invitation.id"
+            v-for="(data, i) in [...board.invitations, ...board.members]"
+            :key="data.id"
           >
             <div class="flex items-center gap-2">
-              <Avatar
-                :image="invitation.avatar"
-                shape="circle"
-                class="w-12 h-12"
-              />
+              <Avatar :image="data.avatar" shape="circle" class="w-12 h-12" />
               <div class="flex flex-col gap-1 max-w-full">
                 <span class="truncate">
-                  {{
-                    "full_name" in invitation
-                      ? invitation.full_name
-                      : invitation.email
-                  }}
+                  {{ "full_name" in data ? data.full_name : data.email }}
                 </span>
                 <Tag
-                  v-if="!('full_name' in invitation)"
+                  v-if="!('full_name' in data)"
                   value="Pending"
                   class="w-fit text-xs"
                   severity="secondary"
@@ -805,7 +866,7 @@ async function updateInvitation(invitationId: string, role: string) {
               <div class="flex flex-col gap-1 w-full">
                 <label for="role">Role</label>
                 <Select
-                  :default-value="invitation.role"
+                  :default-value="data.role"
                   fluid
                   name="role"
                   option-value="value"
@@ -829,7 +890,10 @@ async function updateInvitation(invitationId: string, role: string) {
                     },
                   ]"
                   @value-change="
-                    (value) => updateInvitation(invitation.id, value)
+                    (value) =>
+                      'full_name' in data
+                        ? updateMember(data.id, value)
+                        : updateInvitation(data.id, value)
                   "
                 >
                   <template #option="{ option }">
@@ -845,7 +909,12 @@ async function updateInvitation(invitationId: string, role: string) {
                 icon-class="text-red-500"
                 severity="secondary"
                 rounded
-                @click="deleteMemberInvitation(invitation.id)"
+                @click="
+                  () =>
+                    'full_name' in data
+                      ? deleteMember(data.id)
+                      : deleteMemberInvitation(data.id)
+                "
               />
             </div>
 
