@@ -190,7 +190,7 @@ onMounted(async () => {
         ) as DetailedBoard;
 
         const updatedMember = message.data as BoardMember;
-        const memberIndex = currentBoard.invitations.findIndex(
+        const memberIndex = currentBoard.members.findIndex(
           (l) => l.id === updatedMember.id,
         );
         currentBoard.members[memberIndex] = updatedMember;
