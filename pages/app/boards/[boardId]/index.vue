@@ -104,6 +104,19 @@ onMounted(async () => {
 
         break;
       }
+      case "card_deleted": {
+        const card = message.data as { id: string; parent_list: string };
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+        const parentList = currentBoard.lists.find(
+          (l) => l.id === card.parent_list,
+        )!;
+
+        parentList.cards = parentList.cards.filter((c) => c.id !== card.id);
+
+        break;
+      }
       case "label_updated": {
         const currentBoard = boardsStore.boards.find(
           (b) => b.id === (route.params.boardId as string) && "labels" in b,

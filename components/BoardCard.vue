@@ -50,6 +50,7 @@ const contextMenuItems = computed((): MenuItem[] => [
   {
     label: "Delete card",
     icon: "pi pi-trash",
+    command: deleteCard,
   },
 ]);
 const isLoading = ref<boolean>(false);
@@ -152,6 +153,26 @@ async function renameCard({ states, valid }: FormSubmitEvent) {
       summary: "Success",
       detail: `Card renamed`,
       life: 3000,
+    });
+  }
+}
+
+async function deleteCard() {
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+    {
+      method: "DELETE",
+    },
+  ).catch((res) => res);
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
     });
   }
 }
