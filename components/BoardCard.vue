@@ -242,7 +242,7 @@ async function deleteCard() {
   <Dialog
     v-model:visible="openRenameDialog"
     modal
-    header="Create a new board"
+    header="Rename card"
     :style="{ width: '25vw' }"
     :breakpoints="{ '1199px': '50vw', '575px': '90vw' }"
     dismissable-mask
