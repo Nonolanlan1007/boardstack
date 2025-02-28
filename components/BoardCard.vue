@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MenuItem } from "primevue/menuitem";
 import type { BoardCard } from "~/utils/types";
+import type { FormSubmitEvent } from "@primevue/forms";
 
 const props = defineProps<{
   card: BoardCard;
@@ -8,6 +9,7 @@ const props = defineProps<{
 }>();
 
 const toast = useToast();
+const route = useRoute();
 
 const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
@@ -43,6 +45,7 @@ const contextMenuItems = computed((): MenuItem[] => [
   {
     label: "Duplicate card",
     icon: "pi pi-clone",
+    command: duplicateCard,
   },
   {
     label: "Delete card",
@@ -82,6 +85,73 @@ async function moveCard(newParentList: string) {
       summary: "Error",
       detail: `${res.status} - ${data.message}`,
       life: 5000,
+    });
+  }
+}
+
+async function duplicateCard() {
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: props.card.title,
+        description: props.card.description ? props.card.description : null,
+        parentList: props.card.parent_list,
+        labels:
+          props.card.labels && props.card.labels.length > 0
+            ? props.card.labels
+            : undefined,
+      }),
+    },
+  ).catch((res) => res);
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+}
+
+async function renameCard({ states, valid }: FormSubmitEvent) {
+  if (valid) {
+    isLoading.value = true;
+    const res = await fetch(
+      `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: states.title.value,
+        }),
+      },
+    ).catch((res) => res);
+    isLoading.value = false;
+
+    if (!res.ok) {
+      const data = await res.json();
+
+      return toast.add({
+        severity: "error",
+        summary: "Error",
+        detail: `${res.status} - ${data.message}`,
+        life: 5000,
+      });
+    }
+
+    openRenameDialog.value = false;
+
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: `Card renamed`,
+      life: 3000,
     });
   }
 }
@@ -156,7 +226,23 @@ async function moveCard(newParentList: string) {
     :breakpoints="{ '1199px': '50vw', '575px': '90vw' }"
     dismissable-mask
   >
-    <Form v-slot="$form" :initial-values="card">
+    <Form
+      v-slot="$form"
+      :initial-values="card"
+      :resolver="
+        ({ values }: FormSubmitEvent) => {
+          const errors: { [key: string]: { message: string }[] } = {};
+
+          if (!values.title || values.title === '')
+            errors.title = [{ message: 'Title is required' }];
+          else if (values.title.length > 50)
+            errors.title = [{ message: 'Title is too long' }];
+
+          return { errors };
+        }
+      "
+      @submit="renameCard"
+    >
       <div class="flex flex-col gap-1 w-full">
         <label for="title">Title</label>
         <InputText placeholder="Card Title" type="text" name="title" fluid />
