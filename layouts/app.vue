@@ -59,7 +59,7 @@ function toggleColorMode() {
 }
 
 const accountMenuItems = computed<MenuItem[]>(() => [
-  colorMode.value === "light"
+  /*colorMode.value === "light"
     ? {
         label: "Dark mode",
         icon: "pi pi-moon",
@@ -69,7 +69,7 @@ const accountMenuItems = computed<MenuItem[]>(() => [
         label: "Light mode",
         icon: "pi pi-sun",
         command: toggleColorMode,
-      },
+      },*/
   {
     label: "Account Settings",
     icon: "pi pi-user",
