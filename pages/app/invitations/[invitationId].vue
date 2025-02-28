@@ -7,7 +7,7 @@ const route = useRoute();
 const colorMode = useColorMode();
 const toast = useToast();
 
-const { data: user } = await useFetch(`/api/users/@me`);
+const { user } = useUserStore();
 
 const { data: invitationData, error: invitationFetchError } = useFetch(
   `/api/invitations/${route.params.invitationId}`,
