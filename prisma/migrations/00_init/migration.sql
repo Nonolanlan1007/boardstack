@@ -5,6 +5,7 @@ CREATE TABLE `board_cards` (
     `description` VARCHAR(255) NULL,
     `parent_list` CHAR(36) NOT NULL,
     `position` INTEGER NOT NULL,
+    `created_by` CHAR(36) NOT NULL,
     `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` TIMESTAMP(0) NULL,
 

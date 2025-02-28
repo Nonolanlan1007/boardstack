@@ -83,6 +83,7 @@ export default defineEventHandler(async (event) => {
             },
           }
         : {}),
+      created_by: user.id,
     },
     include: {
       labels: {
