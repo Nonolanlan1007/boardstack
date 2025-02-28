@@ -95,5 +95,21 @@ export const useBoardsStore = defineStore("boards", {
         b.id === boardId ? { ...b, ...data } : b,
       );
     },
+    mergeCards(boardId: string, data: BoardCard) {
+      const board = this.boards.find(
+        (board) => board.id === boardId && "lists" in board,
+      )! as DetailedBoard;
+      const parentList = board.lists.find(
+        (list) => list.id === data.parent_list,
+      )!;
+      const oldCardIndex = parentList.cards.findIndex(
+        (card) => card.id === data.id,
+      );
+
+      parentList.cards[oldCardIndex] = {
+        ...parentList.cards[oldCardIndex],
+        ...data,
+      };
+    },
   },
 });

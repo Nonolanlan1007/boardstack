@@ -100,6 +100,8 @@ onMounted(async () => {
 
         currentBoard.lists = updateCardPosition(updatedCard, currentBoard);
 
+        boardsStore.mergeCards(route.params.boardId as string, updatedCard);
+
         break;
       }
       case "label_updated": {
