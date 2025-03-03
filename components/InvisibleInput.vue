@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const model = defineModel<string>("value");
-const props = defineProps<{ defaultValue?: string; class?: string }>();
+const props = defineProps<{
+  defaultValue?: string;
+  class?: string;
+  maxLength?: number;
+}>();
 const emit = defineEmits(["submit"]);
 
 model.value = props.defaultValue || "";
@@ -27,7 +31,7 @@ function submit() {
         props.class,
       )
     "
-    :maxlength="20"
+    :maxlength="maxLength"
     @focusout="submit"
     @keyup.enter="submit"
   />
