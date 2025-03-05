@@ -247,7 +247,7 @@ onMounted(async () => {
   <main v-if="board" class="max-h-screen min-w-screen">
     <div class="flex items-center justify-between gap-4">
       <InvisibleInput
-        v-model="board.title"
+        v-model:value="board.title"
         class="text-4xl font-bold min-w-72"
         :max-length="20"
         @submit="(value) => renameBoard(value)"
