@@ -70,7 +70,7 @@ importers:
         version: 7.0.0
       primevue:
         specifier: ^4.2.5
-        version: 4.2.5(vue@3.5.13(typescript@5.7.3))
+        version: 4.3.1(vue@3.5.13(typescript@5.7.3))
       quill:
         specifier: ^2.0.3
         version: 2.0.3
@@ -1015,10 +1015,6 @@ packages:
 
   '@primevue/forms@4.3.1':
     resolution: {integrity: sha512-2IWIrRCV82ey7fUb0dQhnJX8iqddcyZNajsEQpRMw1MO8NchN+vT26H2H1AYDI5uwwmv1FCqr+MiU9wk39Ub2g==}
-    engines: {node: '>=12.11.0'}
-
-  '@primevue/icons@4.2.5':
-    resolution: {integrity: sha512-WFbUMZhQkXf/KmwcytkjGVeJ9aGEDXjP3uweOjQZMmRdEIxFnqYYpd90wE90JE1teZn3+TVnT4ZT7ejGyEXnFQ==}
     engines: {node: '>=12.11.0'}
 
   '@primevue/icons@4.3.1':
@@ -4846,10 +4842,6 @@ packages:
   primeicons@7.0.0:
     resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
 
-  primevue@4.2.5:
-    resolution: {integrity: sha512-7UMOIJvdFz4jQyhC76yhNdSlHtXvVpmE2JSo2ndUTBWjWJOkYyT562rQ4ayO+bMdJLtzBGqgY64I9ZfEvNd7vQ==}
-    engines: {node: '>=12.11.0'}
-
   primevue@4.3.1:
     resolution: {integrity: sha512-NSUpcWf2WpXgqOvjgXu5zQM3E5UEXoA2iXLi6xV+h1SBZ1TmgNfrjme96KRzfUY2RBsI0rTSUuPv0I+fXvtcmA==}
     engines: {node: '>=12.11.0'}
@@ -7322,13 +7314,6 @@ snapshots:
       '@primeuix/forms': 0.0.4
       '@primeuix/utils': 0.5.1
       '@primevue/core': 4.3.1(vue@3.5.13(typescript@5.7.3))
-    transitivePeerDependencies:
-      - vue
-
-  '@primevue/icons@4.2.5(vue@3.5.13(typescript@5.7.3))':
-    dependencies:
-      '@primeuix/utils': 0.3.2
-      '@primevue/core': 4.2.5(vue@3.5.13(typescript@5.7.3))
     transitivePeerDependencies:
       - vue
 
@@ -12028,15 +12013,6 @@ snapshots:
       parse-ms: 4.0.0
 
   primeicons@7.0.0: {}
-
-  primevue@4.2.5(vue@3.5.13(typescript@5.7.3)):
-    dependencies:
-      '@primeuix/styled': 0.3.2
-      '@primeuix/utils': 0.3.2
-      '@primevue/core': 4.2.5(vue@3.5.13(typescript@5.7.3))
-      '@primevue/icons': 4.2.5(vue@3.5.13(typescript@5.7.3))
-    transitivePeerDependencies:
-      - vue
 
   primevue@4.3.1(vue@3.5.13(typescript@5.7.3)):
     dependencies:
