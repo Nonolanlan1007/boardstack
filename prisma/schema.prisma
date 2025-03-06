@@ -10,9 +10,10 @@ datasource db {
 model board_cards {
   id          String        @id @db.Char(36)
   title       String        @db.VarChar(255)
-  description String?       @db.VarChar(255)
+  description String?       @db.Text
   parent_list String        @db.Char(36)
   position    Int
+  created_by  String        @db.VarChar(255)
   created_at  DateTime      @default(now()) @db.Timestamp(0)
   updated_at  DateTime?     @updatedAt @db.Timestamp(0)
   lists       board_lists   @relation(fields: [parent_list], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "board_cards_parent_list_foreign")
@@ -81,7 +82,7 @@ model boards {
   id                 String    @id @db.Char(36)
   owner_id           String    @db.Char(36)
   title              String    @db.VarChar(255)
-  description        String?   @db.VarChar(255)
+  description        String?   @db.Text
   background         String    @db.VarChar(255)
   background_type    String    @db.VarChar(255)
   created_at         DateTime  @default(now()) @db.Timestamp(0)

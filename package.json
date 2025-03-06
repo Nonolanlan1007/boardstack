@@ -1,6 +1,6 @@
 {
   "name": "boarstack",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,9 +14,10 @@
   "dependencies": {
     "@adonisjs/env": "^6.1.1",
     "@nuxt/image": "^1.9.0",
+    "@nuxtjs/mdc": "0.14.0",
     "@pinia/nuxt": "0.10.1",
+    "@primeuix/themes": "^1.0.0",
     "@primevue/forms": "^4.2.5",
-    "@primevue/themes": "^4.2.5",
     "@prisma/client": "6.4.1",
     "@prisma/nuxt": "0.3.0",
     "@vueuse/core": "^12.7.0",

@@ -3,28 +3,22 @@ import type { MenuItem } from "primevue/menuitem";
 import type { FormSubmitEvent } from "@primevue/forms";
 import CustomIcon from "~/components/CustomIcon.vue";
 
-const cookies = useCookie("nuxt-session");
 const toast = useToast();
 const route = useRoute();
 const colorMode = useColorMode();
 
 const boardsStore = useBoardsStore();
+const userStore = useUserStore();
 
-const { data: user, error: userError } =
-  await useFetch<UserProfile>(`/api/users/@me`);
+await userStore.fetchUser();
 
-if (userError.value || !user.value) {
-  cookies.value = null;
-  setTimeout(async () => navigateTo("/signin"), 100);
-}
-
-await callOnce(() => boardsStore.fetchBoards(user.value!));
+await callOnce(() => boardsStore.fetchBoards(userStore.user!));
 
 const mainMenuItems = computed<MenuItem[]>(() => [
   {
     label: "Your boards",
     items: boardsStore.boards
-      .filter((board) => user.value && board.owner_id === user.value.id)
+      .filter((board) => userStore.user && board.owner_id === userStore.user.id)
       .sort(
         (a, b) =>
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
@@ -36,13 +30,15 @@ const mainMenuItems = computed<MenuItem[]>(() => [
     key: "boards",
   },
   ...(boardsStore.boards.filter(
-    (board) => user.value && board.owner_id !== user.value.id,
+    (board) => userStore.user && board.owner_id !== userStore.user.id,
   ).length > 0
     ? [
         {
           label: "Shared with you",
           items: boardsStore.boards
-            .filter((board) => user.value && board.owner_id !== user.value.id)
+            .filter(
+              (board) => userStore.user && board.owner_id !== userStore.user.id,
+            )
             .sort(
               (a, b) =>
                 new Date(a.created_at).getTime() -
@@ -63,7 +59,7 @@ function toggleColorMode() {
 }
 
 const accountMenuItems = computed<MenuItem[]>(() => [
-  colorMode.value === "light"
+  /*colorMode.value === "light"
     ? {
         label: "Dark mode",
         icon: "pi pi-moon",
@@ -73,7 +69,7 @@ const accountMenuItems = computed<MenuItem[]>(() => [
         label: "Light mode",
         icon: "pi pi-sun",
         command: toggleColorMode,
-      },
+      },*/
   {
     label: "Account Settings",
     icon: "pi pi-user",
@@ -148,7 +144,7 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
     const boardData = await res.json();
 
     isLoading.value = true;
-    await boardsStore.fetchBoards(user.value!);
+    await boardsStore.fetchBoards(userStore.user!);
     isLoading.value = false;
     isNewBoardModalOpen.value = false;
     step.value = 0;
@@ -218,7 +214,7 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
             </span>
           </NuxtLink>
         </template>
-        <template v-if="user" #end>
+        <template v-if="userStore.user" #end>
           <Menu
             id="overlay_menu"
             ref="accountMenu"
@@ -242,8 +238,12 @@ async function createBlankBoard({ valid, states }: FormSubmitEvent) {
             class="relative overflow-hidden w-full border-0 bg-transparent flex items-center p-2 pl-4 hover:bg-emphasis rounded-none cursor-pointer transition-colors duration-200"
             @click="toggle"
           >
-            <Avatar :image="user.avatar" class="mr-2" shape="circle" />
-            <span class="font-bold">{{ user.full_name }}</span>
+            <Avatar
+              :image="userStore.user.avatar"
+              class="mr-2"
+              shape="circle"
+            />
+            <span class="font-bold">{{ userStore.user.full_name }}</span>
           </button>
         </template>
       </Menu>

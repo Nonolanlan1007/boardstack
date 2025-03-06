@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import Aura from "@primevue/themes/aura";
+import Aura from "@primeuix/themes/aura";
 import * as packageJson from "./package.json";
 import { createRequire } from "module";
 
@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "nuxt-auth-utils",
     "@prisma/nuxt",
+    "@nuxtjs/mdc",
   ],
   tailwindcss: { exposeConfig: true },
   css: ["primeicons/primeicons.css"],
@@ -91,5 +92,10 @@ export default defineNuxtConfig({
   prisma: {
     runMigration: true,
     skipPrompts: true,
+  },
+  mdc: {
+    headings: {
+      anchorLinks: false,
+    },
   },
 });

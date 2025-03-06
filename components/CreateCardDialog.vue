@@ -85,7 +85,7 @@ async function createCard({ states, valid }: FormSubmitEvent) {
       :initial-values="initialValues"
       @submit="createCard"
     >
-      <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
         <div class="md:col-span-4">
           <div class="flex flex-col gap-1 w-full mb-2">
             <label for="title">Title</label>

@@ -35,17 +35,50 @@
       </div>
     </header>
 
-    <section class="flex gap-4 flex-wrap container py-72">
-      <div class="flex gap-4 flex-wrap w-full">
-        <RealTimeCard />
-        <GitHubIntegrationCard />
-        <div class="flex-1 min-w-80 h-80 bg-surface-500" />
+    <section class="container py-72">
+      <div class="flex gap-4 flex-wrap">
+        <div class="flex gap-4 flex-wrap w-full">
+          <RealTimeCard />
+          <GitHubIntegrationCard />
+          <Card class="flex-1 min-w-80 h-80 overflow-clip">
+            <template #title>
+              <h3 class="text-center text-xl font-semibold flex justify-center">
+                Private & Open-Source
+              </h3>
+              <p class="text-sm text-center text-balance">
+                All BoardStack code is open source to ensure transparency and
+                security
+              </p>
+            </template>
+
+            <template #content>
+              <ClientOnly>
+                <NuxtImg
+                  v-if="colorMode === 'dark'"
+                  src="/images/home_opensource_card_image_dark.png"
+                  format="webp"
+                  class="rounded border border-surface-800"
+                />
+                <NuxtImg
+                  v-else
+                  src="/images/home_opensource_card_image_light.png"
+                  format="webp"
+                  class="rounded border border-surface-200"
+                />
+              </ClientOnly>
+            </template>
+          </Card>
+        </div>
+        <div class="flex gap-4 flex-wrap w-full">
+          <WorkflowsCard />
+          <div class="flex-1 min-w-80 h-80 bg-surface-500" />
+          <div class="flex-1 min-w-80 h-80 bg-surface-500" />
+        </div>
       </div>
-      <div class="flex gap-4 flex-wrap w-full">
-        <div class="flex-1 min-w-80 h-80 bg-surface-500" />
-        <div class="flex-1 min-w-80 h-80 bg-surface-500" />
-        <div class="flex-1 min-w-80 h-80 bg-surface-500" />
-      </div>
+      <p class="my-2 opacity-50 text-center text-xs">
+        * Workflow feature is actually in developement and will be available in
+        the future.
+      </p>
     </section>
 
     <SelfHostSection />
@@ -126,6 +159,9 @@ import TypeIt from "typeit";
 import RealTimeCard from "~/components/homepage/RealTimeCard.vue";
 import SelfHostSection from "~/components/homepage/SelfHostSection.vue";
 import GitHubIntegrationCard from "~/components/homepage/GitHubIntegrationCard.vue";
+import WorkflowsCard from "~/components/homepage/WorkflowsCard.vue";
+
+const colorMode = useColorMode();
 
 onMounted(() => {
   new TypeIt("#header-typeit", {

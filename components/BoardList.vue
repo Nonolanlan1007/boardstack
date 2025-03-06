@@ -98,8 +98,6 @@ async function onCardDrop(event: VueDndDropEvent) {
         showOnTop: true,
       }"
       @drop="(e: VueDndDropEvent) => onCardDrop(e)"
-      @drag-start="(e) => console.log('drag start', e)"
-      @drag-end="(e) => console.log('drag end', e)"
     >
       <Draggable
         v-for="card in list.cards"

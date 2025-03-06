@@ -100,6 +100,21 @@ onMounted(async () => {
 
         currentBoard.lists = updateCardPosition(updatedCard, currentBoard);
 
+        boardsStore.mergeCards(route.params.boardId as string, updatedCard);
+
+        break;
+      }
+      case "card_deleted": {
+        const card = message.data as { id: string; parent_list: string };
+        const currentBoard = boardsStore.boards.find(
+          (b) => b.id === (route.params.boardId as string) && "labels" in b,
+        ) as DetailedBoard;
+        const parentList = currentBoard.lists.find(
+          (l) => l.id === card.parent_list,
+        )!;
+
+        parentList.cards = parentList.cards.filter((c) => c.id !== card.id);
+
         break;
       }
       case "label_updated": {
@@ -232,8 +247,9 @@ onMounted(async () => {
   <main v-if="board" class="max-h-screen min-w-screen">
     <div class="flex items-center justify-between gap-4">
       <InvisibleInput
-        v-model="board.title"
+        v-model:value="board.title"
         class="text-4xl font-bold min-w-72"
+        :max-length="20"
         @submit="(value) => renameBoard(value)"
       />
       <div class="flex items-center gap-2">
