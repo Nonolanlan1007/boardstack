@@ -25,7 +25,7 @@ importers:
         version: 1.0.0
       '@primevue/forms':
         specifier: ^4.2.5
-        version: 4.2.5(vue@3.5.13(typescript@5.7.3))
+        version: 4.3.1(vue@3.5.13(typescript@5.7.3))
       '@prisma/client':
         specifier: 6.4.1
         version: 6.4.1(prisma@6.4.1(typescript@5.7.3))(typescript@5.7.3)
@@ -967,8 +967,8 @@ packages:
   '@poppinss/validator-lite@2.1.0':
     resolution: {integrity: sha512-CfT8EPeB7jKxjCb5+KP32iu/0BB7cKlRRqMBcCwzky0WgFACsFlRtvHsy+CkOszHmNyOdoH3WoyMyoxVCu9qEw==}
 
-  '@primeuix/forms@0.0.2':
-    resolution: {integrity: sha512-DpecPQd/Qf/kav4LKCaIeGuT3AkwhJzuHCkLANTVlN/zBvo8KIj3OZHsCkm0zlIMVVnaJdtx1ULNlRQdudef+A==}
+  '@primeuix/forms@0.0.4':
+    resolution: {integrity: sha512-WKrxZPM9fPAEsM0xcTrOOJn86MbfOEzPwSwpO94Y7RtguWw+1nrvqYNzCcmVqO6zBi0BVMihoWxMKFIRzTOuZg==}
     engines: {node: '>=12.11.0'}
 
   '@primeuix/styled@0.3.2':
@@ -987,6 +987,10 @@ packages:
 
   '@primeuix/utils@0.3.2':
     resolution: {integrity: sha512-B+nphqTQeq+i6JuICLdVWnDMjONome2sNz0xI65qIOyeB4EF12CoKRiCsxuZ5uKAkHi/0d1LqlQ9mIWRSdkavw==}
+    engines: {node: '>=12.11.0'}
+
+  '@primeuix/utils@0.4.1':
+    resolution: {integrity: sha512-5+1NLfyna+gLRPeFTo+xlR0tfPVLuVdidbeahAMLkQga5Rw0LxyUBCyD2/Zv2JkV69o2T+hpEDyddl3VdnYoBw==}
     engines: {node: '>=12.11.0'}
 
   '@primeuix/utils@0.5.1':
@@ -1009,8 +1013,8 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
-  '@primevue/forms@4.2.5':
-    resolution: {integrity: sha512-5jarJQ9Qv32bOo/0tY5bqR3JZI6+YmmoUQ2mjhVSbVElQsE4FNfhT7a7JwF+xgBPMPc8KWGNA1QB248HhPNVAg==}
+  '@primevue/forms@4.3.1':
+    resolution: {integrity: sha512-2IWIrRCV82ey7fUb0dQhnJX8iqddcyZNajsEQpRMw1MO8NchN+vT26H2H1AYDI5uwwmv1FCqr+MiU9wk39Ub2g==}
     engines: {node: '>=12.11.0'}
 
   '@primevue/icons@4.2.5':
@@ -7271,9 +7275,9 @@ snapshots:
 
   '@poppinss/validator-lite@2.1.0': {}
 
-  '@primeuix/forms@0.0.2':
+  '@primeuix/forms@0.0.4':
     dependencies:
-      '@primeuix/utils': 0.3.2
+      '@primeuix/utils': 0.4.1
 
   '@primeuix/styled@0.3.2':
     dependencies:
@@ -7293,6 +7297,8 @@ snapshots:
 
   '@primeuix/utils@0.3.2': {}
 
+  '@primeuix/utils@0.4.1': {}
+
   '@primeuix/utils@0.5.1': {}
 
   '@primevue/auto-import-resolver@4.3.1':
@@ -7311,11 +7317,11 @@ snapshots:
       '@primeuix/utils': 0.5.1
       vue: 3.5.13(typescript@5.7.3)
 
-  '@primevue/forms@4.2.5(vue@3.5.13(typescript@5.7.3))':
+  '@primevue/forms@4.3.1(vue@3.5.13(typescript@5.7.3))':
     dependencies:
-      '@primeuix/forms': 0.0.2
-      '@primeuix/utils': 0.3.2
-      '@primevue/core': 4.2.5(vue@3.5.13(typescript@5.7.3))
+      '@primeuix/forms': 0.0.4
+      '@primeuix/utils': 0.5.1
+      '@primevue/core': 4.3.1(vue@3.5.13(typescript@5.7.3))
     transitivePeerDependencies:
       - vue
 
