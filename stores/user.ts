@@ -16,7 +16,7 @@ export const useUserStore = defineStore("user", {
 
       if (userError.value || !user.value) {
         cookies.value = null;
-        setTimeout(async () => navigateTo("/signin"), 100);
+        setTimeout(() => navigateTo("/signin"), 100);
       }
 
       this.user = user.value;
