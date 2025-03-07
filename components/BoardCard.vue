@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const toast = useToast();
 const route = useRoute();
+const { copy } = useClipboard();
 
 const { user } = useUserStore();
 
@@ -20,6 +21,7 @@ const showFullDesc = ref<boolean>(false);
 const editDesc = ref<boolean>(false);
 const cardTitle = ref<string>(props.card.title);
 const cardDescription = ref<string>(props.card.description || "");
+const cardLinkCopied = ref<boolean>(false);
 
 if (route.query.card && route.query.card === props.card.id)
   showCard.value = true;
@@ -257,6 +259,13 @@ async function updateDesc() {
     detail: `Card renamed`,
     life: 3000,
   });
+}
+
+async function shareCard() {
+  await copy(window.location.href);
+
+  cardLinkCopied.value = true;
+  setTimeout(() => (cardLinkCopied.value = false), 3000);
 }
 
 watch(route, (value) => {
@@ -529,16 +538,28 @@ watch(props, (value) => {
           />
         </div>
 
-        <div class="flex flex-col gap-1 w-full">
-          <Button
-            fluid
-            :disabled="parentBoard.current_user_role === 'reader'"
-            icon="pi pi-trash"
-            label="Delete Card"
-            class="mt-4 !border-red-500 !text-red-500 !justify-start"
-            variant="outlined"
-            @click="deleteCard"
-          />
+        <div class="flex flex-col gap-1 w-full mt-6">
+          <label>Actions</label>
+          <div class="flex flex-col gap-2 w-full">
+            <Button
+              fluid
+              :disabled="parentBoard.current_user_role === 'reader'"
+              :icon="cardLinkCopied ? 'pi pi-check' : 'pi pi-share-alt'"
+              :label="cardLinkCopied ? 'Link copied to clipboard' : 'Share'"
+              class="!justify-start"
+              variant="outlined"
+              @click="shareCard"
+            />
+            <Button
+              fluid
+              :disabled="parentBoard.current_user_role === 'reader'"
+              icon="pi pi-trash"
+              label="Delete"
+              class="!border-red-500 !text-red-500 !justify-start"
+              variant="outlined"
+              @click="deleteCard"
+            />
+          </div>
         </div>
       </div>
     </div>
