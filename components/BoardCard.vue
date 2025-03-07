@@ -511,6 +511,26 @@ watch(props, (value) => {
             Click to add a description
           </p>
         </div>
+        <div class="flex flex-col gap-1 w-full mb-2">
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-comments text-lg" />
+            Activity
+          </label>
+          <div class="px-8 py-4 border-l dark:border-surface-700 ml-2 group">
+            <div v-if="cardCreator" class="flex items-center gap-1 my-2">
+              <Avatar :image="cardCreator.avatar" shape="circle" />
+              <div>
+                <p>
+                  <span class="font-bold">{{ cardCreator.full_name }}</span>
+                  created this card
+                </p>
+                <p class="text-xs">
+                  {{ formatDate(card.created_at, true) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="md:col-span-2">
         <div class="flex flex-col gap-1 w-full mb-2">
