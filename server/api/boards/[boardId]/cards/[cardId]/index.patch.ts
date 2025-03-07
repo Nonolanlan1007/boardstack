@@ -123,7 +123,7 @@ export default defineEventHandler(async (event) => {
     where: { id: cardId },
     data: {
       ...(body.title && { title: body.title }),
-      ...(body.description && { description: body.description }),
+      ...(body.description !== undefined && { description: body.description }),
       ...(body.parent_list && { parent_list: body.parent_list }),
       ...(body.position !== undefined && { position: body.position }),
       ...(body.title && { title: body.title }),
