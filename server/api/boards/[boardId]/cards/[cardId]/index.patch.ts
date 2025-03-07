@@ -13,6 +13,7 @@ const bodySchema = z.object({
   title: z.string().trim().max(50).optional(),
   description: z.string().nullable().optional(),
   labels: z.array(z.string()).optional(),
+  assigned_to: z.string().nullable().optional(),
 });
 
 export default defineEventHandler(async (event) => {
@@ -29,12 +30,13 @@ export default defineEventHandler(async (event) => {
     body.position === undefined &&
     !body.title &&
     body.description === undefined &&
+    body.assigned_to === undefined &&
     !body.labels
   )
     return createError({
       statusCode: 400,
       message:
-        "One of the following fields are required: `title`, `description`, `position`, `parent_list` or `labels`",
+        "One of the following fields are required: `title`, `description`, `position`, `parent_list`, `assigned_to` or `labels`",
     });
 
   const user = await auth.user(event);
@@ -119,6 +121,18 @@ export default defineEventHandler(async (event) => {
       });
   }
 
+  if (body.assigned_to && body.assigned_to !== user.id) {
+    const member = await prisma.board_members.findFirst({
+      where: { user_id: body.assigned_to, parent_board: boardId },
+    });
+
+    if (!member)
+      throw createError({
+        statusCode: 404,
+        message: "Member not found",
+      });
+  }
+
   const newCard = await prisma.board_cards.update({
     where: { id: cardId },
     data: {
@@ -127,6 +141,7 @@ export default defineEventHandler(async (event) => {
       ...(body.parent_list && { parent_list: body.parent_list }),
       ...(body.position !== undefined && { position: body.position }),
       ...(body.title && { title: body.title }),
+      ...(body.assigned_to !== undefined && { assigned_to: body.assigned_to }),
     },
     include: {
       labels: {
