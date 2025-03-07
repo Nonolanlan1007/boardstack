@@ -67,6 +67,13 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
+      owner: {
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+        },
+      },
     },
   });
 
@@ -97,6 +104,11 @@ export default defineEventHandler(async (event) => {
       avatar: getGravatar(member.users!.email),
       email: member.users!.email,
     })),
+    owner: {
+      ...board.owner,
+      email: undefined,
+      avatar: getGravatar(board.owner!.email),
+    },
   };
 });
 
@@ -275,17 +287,16 @@ defineRouteMeta({
                           description: "The id of the user",
                           example: "13jc72b5-856l-48cd-9652-2e88a23aoi98",
                         },
-                        email: {
-                          type: "string",
-                          format: "email",
-                          description: "The email address of the member",
-                          example: "john.doe@boardstack.app",
-                        },
                         avatar: {
                           type: "string",
-                          description: "The gravatar of the invited user",
+                          description: "The gravatar of the user",
                           example:
                             "https://www.gravatar.com/avatar/d5e...d9a?size=256&d=identicon",
+                        },
+                        full_name: {
+                          type: "string",
+                          description: "The full name of the user",
+                          example: "John Doe",
                         },
                         role: {
                           type: "string",
@@ -404,6 +415,29 @@ defineRouteMeta({
                             },
                           },
                         },
+                      },
+                    },
+                  },
+                  owner: {
+                    type: "object",
+                    description: "The owner of the board",
+                    properties: {
+                      id: {
+                        type: "string",
+                        format: "uuid",
+                        description: "The id of the owner",
+                        example: "13jc72b5-856l-48cd-9652-2e88a23aoi98",
+                      },
+                      avatar: {
+                        type: "string",
+                        description: "The gravatar of the owner",
+                        example:
+                          "https://www.gravatar.com/avatar/d5e...d9a?size=256&d=identicon",
+                      },
+                      full_name: {
+                        type: "string",
+                        description: "The full name of the owner",
+                        example: "John Doe",
                       },
                     },
                   },
