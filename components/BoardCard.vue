@@ -17,7 +17,9 @@ const { user } = useUserStore();
 const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
 const showCard = ref<boolean>(false);
-const showFullDesc = ref<boolean>(false);
+const showFullDesc = ref<boolean>(
+  !props.card.description || props.card.description.length < 300,
+);
 const editDesc = ref<boolean>(false);
 const cardTitle = ref<string>(props.card.title);
 const cardDescription = ref<string>(props.card.description || "");
@@ -224,6 +226,8 @@ async function editLabels(newLabels: string[]) {
 }
 
 async function updateDesc() {
+  cardDescription.value = cardDescription.value.trim();
+
   if (cardDescription.value === props.card.description)
     return (editDesc.value = false);
 
@@ -234,7 +238,10 @@ async function updateDesc() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        description: !cardDescription.value ? null : cardDescription.value,
+        description:
+          !cardDescription.value || cardDescription.value === "<p></p>"
+            ? null
+            : cardDescription.value.replace(/&nbsp;/g, " "),
       }),
     },
   ).catch((res) => res);
@@ -256,7 +263,7 @@ async function updateDesc() {
   toast.add({
     severity: "success",
     summary: "Success",
-    detail: `Card renamed`,
+    detail: `Description updated`,
     life: 3000,
   });
 }
@@ -276,6 +283,8 @@ watch(route, (value) => {
 watch(props, (value) => {
   cardTitle.value = value.card.title;
   cardDescription.value = value.card.description || "";
+  if (!props.card.description || props.card.description.length < 300)
+    showFullDesc.value = true;
 });
 </script>
 
@@ -434,7 +443,7 @@ watch(props, (value) => {
         <div class="flex flex-col gap-1 w-full mb-2">
           <label>Description</label>
           <div
-            v-if="card.description"
+            v-if="card.description || editDesc"
             :class="
               cn(
                 'relative rounded',
@@ -470,26 +479,22 @@ watch(props, (value) => {
               />
             </div>
             <div v-else>
-              <Editor
-                v-model="cardDescription"
-                name="description"
-                :default-value="card.description || ''"
-              />
+              <Editor v-model="cardDescription" name="description" />
               <div class="flex items-center justify-end w-full gap-2 my-2">
                 <Button
                   variant="outlined"
                   label="Cancel"
-                  @click="
-                    () => {
-                      editDesc = false;
-                    }
-                  "
+                  @click="editDesc = false"
                 />
                 <Button label="Save" :loading="isLoading" @click="updateDesc" />
               </div>
             </div>
             <div
-              v-if="!showFullDesc"
+              v-if="
+                !showFullDesc &&
+                card.description &&
+                card.description.length > 300
+              "
               class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-surface-50 dark:from-surface-800 dark:brightness-50 hover:dark:from-surface-950 hover:from-surface-100 from-75% to-transparent h-32 flex items-center justify-center cursor-pointer transition-all"
               @click="showFullDesc = true"
             >
@@ -499,6 +504,7 @@ watch(props, (value) => {
           <p
             v-else
             class="w-full text-center p-6 italic cursor-pointer opacity-75 hover:opacity-100 transition-all"
+            @click="editDesc = true"
           >
             Click to add a description
           </p>
