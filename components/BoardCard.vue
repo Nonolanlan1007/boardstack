@@ -28,14 +28,17 @@ const cardLinkCopied = ref<boolean>(false);
 if (route.query.card && route.query.card === props.card.id)
   showCard.value = true;
 
+const allMembers = computed(() => [
+  {
+    user_id: props.parentBoard.owner.id,
+    full_name: props.parentBoard.owner.full_name,
+    avatar: props.parentBoard.owner.avatar,
+  },
+  ...props.parentBoard.members,
+]);
 const cardCreator = computed(() =>
-  [...props.parentBoard.members, user!].find((member) =>
-    "user_id" in member
-      ? member.user_id === props.card.created_by
-      : member.id === props.card.created_by,
-  ),
+  allMembers.value.find((member) => member.user_id === props.card.created_by),
 );
-
 const contextMenuItems = computed((): MenuItem[] => [
   {
     label: "Open card",
@@ -275,6 +278,43 @@ async function shareCard() {
   setTimeout(() => (cardLinkCopied.value = false), 3000);
 }
 
+async function updateAssigned(userId: string | null) {
+  if (userId === props.card.assigned_to) return;
+
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assigned_to: userId,
+      }),
+    },
+  ).catch((res) => res);
+  isLoading.value = false;
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  editDesc.value = false;
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: `Card updated`,
+    life: 3000,
+  });
+}
+
 watch(route, (value) => {
   if (value.query.card && value.query.card === props.card.id)
     showCard.value = true;
@@ -295,7 +335,25 @@ watch(props, (value) => {
       unstyled
       @contextmenu="onCardRightClick($event)"
     >
-      <template #content>{{ card.title }}</template>
+      <template #content>
+        <div class="flex gap-2 justify-between">
+          {{ card.title }}
+          <Avatar
+            v-if="card.assigned_to"
+            v-tooltip.top="{
+              value: allMembers.find((m) => m.user_id === card.assigned_to)!
+                .full_name,
+              pt: {
+                text: '!text-xs',
+              },
+            }"
+            shape="circle"
+            :image="
+              allMembers.find((m) => m.user_id === card.assigned_to)!.avatar
+            "
+          />
+        </div>
+      </template>
       <template #footer>
         <div class="flex items-center gap-2 flex-wrap mt-1">
           <i
@@ -457,7 +515,7 @@ watch(props, (value) => {
                 <MDC
                   :value="
                     showFullDesc
-                      ? card.description
+                      ? card.description || ''
                       : card.description!.slice(0, 600) + '...'
                   "
                   class="prose dark:prose-invert [&>.ql-align-center]:text-center [&>.ql-align-right]:text-right !max-w-none cursor-pointer"
@@ -548,6 +606,46 @@ watch(props, (value) => {
           </label>
           <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
             <div class="flex flex-col gap-1 w-full mb-2">
+              <label for="assignedTo">Assigned to</label>
+              <Select
+                name="assignedTo"
+                placeholder="Select a member to assign"
+                fluid
+                :options="allMembers"
+                :default-value="
+                  allMembers.find((m) => m.user_id === card.assigned_to)
+                "
+                :disabled="parentBoard.current_user_role === 'reader'"
+                show-clear
+                @value-change="
+                  (value) => updateAssigned(value ? value.user_id : null)
+                "
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center">
+                    <Avatar
+                      v-if="option.avatar"
+                      :image="option.avatar"
+                      shape="circle"
+                      class="!h-6 !w-6 mr-1"
+                    />
+                    <p>{{ option.full_name }}</p>
+                  </div>
+                </template>
+                <template #value="{ value }">
+                  <div v-if="value" class="flex items-center">
+                    <Avatar
+                      :image="value.avatar"
+                      shape="circle"
+                      class="!h-6 !w-6 mr-1"
+                    />
+                    <p>{{ value.full_name }}</p>
+                  </div>
+                </template>
+              </Select>
+            </div>
+
+            <div class="flex flex-col gap-1 w-full mb-2">
               <label for="parentList">Parent list</label>
               <Select
                 name="parentList"
@@ -583,7 +681,6 @@ watch(props, (value) => {
             <div class="flex flex-col gap-2 w-full mt-6">
               <Button
                 fluid
-                :disabled="parentBoard.current_user_role === 'reader'"
                 :icon="cardLinkCopied ? 'pi pi-check' : 'pi pi-share-alt'"
                 :label="cardLinkCopied ? 'Link copied to clipboard' : 'Share'"
                 class="!justify-start"
