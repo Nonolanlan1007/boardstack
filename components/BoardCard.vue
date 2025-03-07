@@ -428,14 +428,6 @@ watch(props, (value) => {
             (value) => renameCard({ valid: true, states: { title: { value } } })
           "
         />
-        <!--<div v-if="cardCreator" class="flex items-center gap-1 my-2">
-          <Avatar
-            :image="cardCreator.avatar"
-            shape="circle"
-            class="!h-6 !w-6"
-          />
-          <p>{{ cardCreator.full_name }}</p>
-        </div>-->
       </div>
     </template>
     <div class="grid grid-cols-1 md:grid-cols-6 w-full">
@@ -534,59 +526,80 @@ watch(props, (value) => {
       </div>
       <div class="md:col-span-2">
         <div class="flex flex-col gap-1 w-full mb-2">
-          <label for="parentList">Parent list</label>
-          <Select
-            name="parentList"
-            placeholder="Select a list"
-            fluid
-            :options="parentBoard.lists"
-            option-label="title"
-            option-value="id"
-            :default-value="card.parent_list"
-            :disabled="parentBoard.current_user_role === 'reader'"
-            @value-change="(value) => moveCard(value)"
-          />
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-users text-lg" />
+            Participants
+          </label>
+          <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
+            <div v-if="cardCreator" class="flex items-center gap-1">
+              <Avatar
+                :image="cardCreator.avatar"
+                shape="circle"
+                class="!h-6 !w-6"
+              />
+              <p>{{ cardCreator.full_name }}</p>
+            </div>
+          </div>
         </div>
+        <div class="flex flex-col gap-1 w-full mb-2">
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-wrench text-lg" />
+            Actions
+          </label>
+          <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
+            <div class="flex flex-col gap-1 w-full mb-2">
+              <label for="parentList">Parent list</label>
+              <Select
+                name="parentList"
+                placeholder="Select a list"
+                fluid
+                :options="parentBoard.lists"
+                option-label="title"
+                option-value="id"
+                :default-value="card.parent_list"
+                :disabled="parentBoard.current_user_role === 'reader'"
+                @value-change="(value) => moveCard(value)"
+              />
+            </div>
 
-        <div class="flex flex-col gap-1 w-full">
-          <label for="labels">Labels</label>
-          <MultiSelect
-            display="chip"
-            :options="parentBoard.labels"
-            option-label="label"
-            option-value="id"
-            filter
-            fluid
-            placeholder="Select labels"
-            name="labels"
-            :max-selected-labels="2"
-            :default-value="card.labels.map((l) => l.label_id)"
-            :disabled="parentBoard.current_user_role === 'reader'"
-            @value-change="(value) => editLabels(value)"
-          />
-        </div>
+            <div class="flex flex-col gap-1 w-full">
+              <label for="labels">Labels</label>
+              <MultiSelect
+                display="chip"
+                :options="parentBoard.labels"
+                option-label="label"
+                option-value="id"
+                filter
+                fluid
+                placeholder="Select labels"
+                name="labels"
+                :max-selected-labels="2"
+                :default-value="card.labels.map((l) => l.label_id)"
+                :disabled="parentBoard.current_user_role === 'reader'"
+                @value-change="(value) => editLabels(value)"
+              />
+            </div>
 
-        <div class="flex flex-col gap-1 w-full mt-6">
-          <label>Actions</label>
-          <div class="flex flex-col gap-2 w-full">
-            <Button
-              fluid
-              :disabled="parentBoard.current_user_role === 'reader'"
-              :icon="cardLinkCopied ? 'pi pi-check' : 'pi pi-share-alt'"
-              :label="cardLinkCopied ? 'Link copied to clipboard' : 'Share'"
-              class="!justify-start"
-              variant="outlined"
-              @click="shareCard"
-            />
-            <Button
-              fluid
-              :disabled="parentBoard.current_user_role === 'reader'"
-              icon="pi pi-trash"
-              label="Delete"
-              class="!border-red-500 !text-red-500 !justify-start"
-              variant="outlined"
-              @click="deleteCard"
-            />
+            <div class="flex flex-col gap-2 w-full mt-6">
+              <Button
+                fluid
+                :disabled="parentBoard.current_user_role === 'reader'"
+                :icon="cardLinkCopied ? 'pi pi-check' : 'pi pi-share-alt'"
+                :label="cardLinkCopied ? 'Link copied to clipboard' : 'Share'"
+                class="!justify-start"
+                variant="outlined"
+                @click="shareCard"
+              />
+              <Button
+                fluid
+                :disabled="parentBoard.current_user_role === 'reader'"
+                icon="pi pi-trash"
+                label="Delete"
+                class="!border-red-500 !text-red-500 !justify-start"
+                variant="outlined"
+                @click="deleteCard"
+              />
+            </div>
           </div>
         </div>
       </div>
