@@ -485,6 +485,18 @@ watch(props, (value) => (cardTitle.value = value.card.title));
             @value-change="(value) => editLabels(value)"
           />
         </div>
+
+        <div class="flex flex-col gap-1 w-full">
+          <Button
+            fluid
+            :disabled="parentBoard.current_user_role === 'reader'"
+            icon="pi pi-trash"
+            label="Delete Card"
+            class="mt-4 !border-red-500 !text-red-500 !justify-start"
+            variant="outlined"
+            @click="deleteCard"
+          />
+        </div>
       </div>
     </div>
   </Dialog>
