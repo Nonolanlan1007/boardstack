@@ -18,7 +18,7 @@ const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
 const showCard = ref<boolean>(false);
 const showFullDesc = ref<boolean>(
-  !props.card.description || props.card.description.length < 300,
+  !props.card.description || props.card.description.length < 600,
 );
 const editDesc = ref<boolean>(false);
 const cardTitle = ref<string>(props.card.title);
@@ -283,7 +283,7 @@ watch(route, (value) => {
 watch(props, (value) => {
   cardTitle.value = value.card.title;
   cardDescription.value = value.card.description || "";
-  if (!props.card.description || props.card.description.length < 300)
+  if (!props.card.description || props.card.description.length < 600)
     showFullDesc.value = true;
 });
 </script>
@@ -438,47 +438,60 @@ watch(props, (value) => {
         </div>-->
       </div>
     </template>
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
+    <div class="grid grid-cols-1 md:grid-cols-6 w-full">
       <div class="md:col-span-4">
         <div class="flex flex-col gap-1 w-full mb-2">
-          <label>Description</label>
-          <div
-            v-if="card.description || editDesc"
-            :class="
-              cn(
-                'relative rounded',
-                !editDesc ? 'border dark:border-surface-800' : '',
-              )
-            "
-          >
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-align-left text-lg" />
+            Description
+          </label>
+          <div v-if="card.description || editDesc">
             <div
               v-if="!editDesc"
-              @click="
-                () => {
-                  if (
-                    showFullDesc &&
-                    parentBoard.current_user_role !== 'reader'
-                  )
-                    editDesc = true;
-                }
-              "
+              class="px-8 py-4 border-l dark:border-surface-700 ml-2 group"
             >
-              <MDC
-                :value="card.description"
-                :class="
-                  cn(
-                    'p-4',
-                    !showFullDesc
-                      ? 'max-h-64 overflow-clip'
-                      : parentBoard.current_user_role === 'reader'
-                        ? ''
-                        : 'cursor-text',
-                  )
+              <div
+                @click="
+                  () => {
+                    if (
+                      showFullDesc &&
+                      parentBoard.current_user_role !== 'reader'
+                    )
+                      editDesc = true;
+                    else if (!showFullDesc) showFullDesc = true;
+                  }
                 "
-                class="prose dark:prose-invert [&>.ql-align-center]:text-center [&>.ql-align-right]:text-right !max-w-none"
-              />
+              >
+                <MDC
+                  :value="
+                    showFullDesc
+                      ? card.description
+                      : card.description!.slice(0, 600) + '...'
+                  "
+                  class="prose dark:prose-invert [&>.ql-align-center]:text-center [&>.ql-align-right]:text-right !max-w-none cursor-pointer"
+                />
+              </div>
+              <div
+                v-if="
+                  !showFullDesc &&
+                  card.description &&
+                  card.description.length > 600
+                "
+                class="relative"
+              >
+                <Button
+                  fluid
+                  label="Show full description"
+                  variant="text"
+                  class="!bg-surface-50 dark:!bg-surface-800 mt-2 z-10 transition-all group-hover:!brightness-90 dark:group-hover:!brightness-110"
+                  @click="showFullDesc = true"
+                />
+                <span
+                  class="absolute w-full h-[200%] bottom-0 left-0 bg-gradient-to-t from-surface-0 dark:from-surface-900 from-60% to-transparent"
+                />
+              </div>
             </div>
-            <div v-else>
+            <div v-else class="p-4">
               <Editor v-model="cardDescription" name="description" />
               <div class="flex items-center justify-end w-full gap-2 my-2">
                 <Button
@@ -488,17 +501,6 @@ watch(props, (value) => {
                 />
                 <Button label="Save" :loading="isLoading" @click="updateDesc" />
               </div>
-            </div>
-            <div
-              v-if="
-                !showFullDesc &&
-                card.description &&
-                card.description.length > 300
-              "
-              class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-surface-50 dark:from-surface-800 dark:brightness-50 hover:dark:from-surface-950 hover:from-surface-100 from-75% to-transparent h-32 flex items-center justify-center cursor-pointer transition-all"
-              @click="showFullDesc = true"
-            >
-              <p>Click to expand</p>
             </div>
           </div>
           <p
