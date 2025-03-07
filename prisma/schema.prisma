@@ -10,7 +10,7 @@ datasource db {
 model board_cards {
   id          String        @id @db.Char(36)
   title       String        @db.VarChar(255)
-  description String?       @db.Text
+  description String?       @db.LongText
   parent_list String        @db.Char(36)
   position    Int
   created_by  String        @db.VarChar(255)
