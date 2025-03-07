@@ -16,6 +16,7 @@ export type DetailedBoard = boards & {
   updated_at: string;
   members: BoardMember[];
   current_user_role: MemberRole;
+  owner: Omit<BoardMember, "role">;
 };
 export type BoardCard = board_cards & { labels: { label_id: string }[] };
 export type BoardList = board_lists & { cards: BoardCard[] };
