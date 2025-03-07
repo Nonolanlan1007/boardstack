@@ -19,6 +19,7 @@ const showCard = ref<boolean>(false);
 const showFullDesc = ref<boolean>(false);
 const editDesc = ref<boolean>(false);
 const cardTitle = ref<string>(props.card.title);
+const cardDescription = ref<string>(props.card.description || "");
 
 if (route.query.card && route.query.card === props.card.id)
   showCard.value = true;
@@ -220,12 +221,53 @@ async function editLabels(newLabels: string[]) {
   }
 }
 
+async function updateDesc() {
+  if (cardDescription.value === props.card.description)
+    return (editDesc.value = false);
+
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description: !cardDescription.value ? null : cardDescription.value,
+      }),
+    },
+  ).catch((res) => res);
+  isLoading.value = false;
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  editDesc.value = false;
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: `Card renamed`,
+    life: 3000,
+  });
+}
+
 watch(route, (value) => {
   if (value.query.card && value.query.card === props.card.id)
     showCard.value = true;
 });
 
-watch(props, (value) => (cardTitle.value = value.card.title));
+watch(props, (value) => {
+  cardTitle.value = value.card.title;
+  cardDescription.value = value.card.description || "";
+});
 </script>
 
 <template>
@@ -368,14 +410,14 @@ watch(props, (value) => (cardTitle.value = value.card.title));
             (value) => renameCard({ valid: true, states: { title: { value } } })
           "
         />
-        <div v-if="cardCreator" class="flex items-center gap-1 my-2">
+        <!--<div v-if="cardCreator" class="flex items-center gap-1 my-2">
           <Avatar
             :image="cardCreator.avatar"
             shape="circle"
             class="!h-6 !w-6"
           />
           <p>{{ cardCreator.full_name }}</p>
-        </div>
+        </div>-->
       </div>
     </template>
     <div class="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
@@ -415,12 +457,13 @@ watch(props, (value) => (cardTitle.value = value.card.title));
                         : 'cursor-text',
                   )
                 "
+                class="prose dark:prose-invert [&>.ql-align-center]:text-center [&>.ql-align-right]:text-right !max-w-none"
               />
             </div>
             <div v-else>
               <Editor
+                v-model="cardDescription"
                 name="description"
-                editor-style="height: 320px;"
                 :default-value="card.description || ''"
               />
               <div class="flex items-center justify-end w-full gap-2 my-2">
@@ -433,7 +476,7 @@ watch(props, (value) => (cardTitle.value = value.card.title));
                     }
                   "
                 />
-                <Button label="Save" />
+                <Button label="Save" :loading="isLoading" @click="updateDesc" />
               </div>
             </div>
             <div
