@@ -9,7 +9,7 @@ export default {
     "./app.vue",
     "./error.vue",
   ],
-  plugins: [require("tailwindcss-primeui")],
+  plugins: [require("tailwindcss-primeui"), require("@tailwindcss/typography")],
   theme: {
     container: {
       center: true,
