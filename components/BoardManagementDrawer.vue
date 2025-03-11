@@ -1039,5 +1039,6 @@ async function deleteMember(memberId: string) {
 
   <LazyActivityExplorerDialog
     v-model:is-activity-dialog-open="isActivityDialogOpen"
+    :board="board"
   />
 </template>
