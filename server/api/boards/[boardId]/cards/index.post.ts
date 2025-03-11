@@ -92,6 +92,18 @@ export default defineEventHandler(async (event) => {
     },
   });
 
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      parent_card_id: newCard.id,
+      action: "card_created",
+      created_by: user.id,
+      linked_value: newCard.parent_list,
+      new_value: newCard.title,
+    },
+  });
+
   broadcastSSE(
     `boards/${boardId}`,
     JSON.stringify({ type: "card_created", data: newCard }),

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const isActivityDialogOpen = defineModel<boolean>("isActivityDialogOpen");
+const props = defineProps<{ board: DetailedBoard }>();
 
 const route = useRoute();
 
@@ -9,12 +10,29 @@ const { data: logs, error } = useFetch(
 
 if (error.value) throw error;
 
-function selectAction(action: string) {
-  switch (action) {
+interface ActivityLog {
+  id: string;
+  parent_board_id: string | null;
+  parent_card_id: string | null;
+  action: string;
+  created_by: string;
+  old_value: string | null;
+  new_value: string | null;
+  linked_value: string | null;
+  full_name: string;
+  avatar: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function selectAction(log: ActivityLog) {
+  switch (log.action) {
     case "rename_board":
       return "renamed the board";
     case "update_board_background":
       return "updated the background";
+    case "card_created":
+      return `created a card in list '${props.board.lists.find((l) => l.id === log.linked_value)!.title}'`;
     default:
       return "did an unknown action";
   }
@@ -26,6 +44,8 @@ function selectIcon(action: string) {
       return "pi-pen-to-square";
     case "update_board_background":
       return "pi-image";
+    case "card_created":
+      return "pi-file-plus";
     default:
       return "pi-wrench";
   }
@@ -50,7 +70,7 @@ function selectIcon(action: string) {
                   {{ log.full_name }}
                 </span>
                 <span>
-                  {{ selectAction(log.action) }}
+                  {{ selectAction(log) }}
                 </span>
               </span>
               <span>{{ formatDate(log.created_at, true) }}</span>
