@@ -65,11 +65,9 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  const cardId = uuid();
-
   const newCard = await prisma.board_cards.create({
     data: {
-      id: cardId,
+      id: uuid(),
       title: body.title,
       description: body.description,
       parent_list: body.parentList,
