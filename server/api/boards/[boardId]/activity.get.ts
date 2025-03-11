@@ -84,3 +84,113 @@ export default defineEventHandler(async (event) => {
     avatar: getGravatar(log.user.email),
   }));
 });
+
+defineRouteMeta({
+  openAPI: {
+    tags: ["Boards"],
+    summary: "Get board activity logs",
+    description: "Get activity logs for a specified board",
+    operationId: "getBoardLogs",
+    responses: {
+      "200": {
+        description: "Activity logs successfully fetched",
+        content: {
+          "application/json": {
+            schema: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: {
+                    type: "string",
+                    format: "uuid",
+                    description: "The id of the log",
+                    example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+                  },
+                  parent_board_id: {
+                    type: "string",
+                    format: "uuid",
+                    nullable: true,
+                    description: "The id of the parent board",
+                    example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+                  },
+                  parent_card_id: {
+                    type: "string",
+                    format: "uuid",
+                    nullable: true,
+                    description: "The id of the parent card",
+                    example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+                  },
+                  action: {
+                    type: "string",
+                    description: "The action associated with the log",
+                    example: "renamed_board",
+                  },
+                  created_by: {
+                    type: "string",
+                    format: "uuid",
+                    description:
+                      "The id of the user that did the associated action",
+                    example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+                  },
+                  old_value: {
+                    type: "string",
+                    nullable: true,
+                    description: "The old value",
+                    example: "Old title of the board",
+                  },
+                  new_value: {
+                    type: "string",
+                    nullable: true,
+                    description: "The new value",
+                    example: "New title of the board",
+                  },
+                  linked_value: {
+                    type: "string",
+                    nullable: true,
+                    description: "Something that is linked to the log",
+                    example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+                  },
+                  full_name: {
+                    type: "string",
+                    description:
+                      "The name of the user that done the associtated action",
+                    example: "John Doe",
+                  },
+                  avatar: {
+                    type: "string",
+                    description:
+                      "The avatar of the user that done the associtated action",
+                    example:
+                      "https://www.gravatar.com/avatar/d5e...d9a?size=256&d=identicon",
+                  },
+                  created_at: {
+                    type: "string",
+                    description: "The date the entry was created",
+                    example: "2025-02-09T09:26:10.570Z",
+                  },
+                  updated_at: {
+                    type: "string",
+                    description: "The date the entry was updated",
+                    example: "2025-02-09T09:26:10.570Z",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "403": {
+        description: "User is not allowed to fetch this board",
+        content: {
+          "text/plain": {
+            schema: {
+              type: "string",
+              example: "Forbidden",
+            },
+          },
+        },
+      },
+    },
+  },
+});
