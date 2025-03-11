@@ -19,7 +19,7 @@
     "@pinia/nuxt": "0.10.1",
     "@primeuix/themes": "^1.0.0",
     "@primevue/forms": "^4.2.5",
-    "@prisma/client": "6.4.1",
+    "@prisma/client": "6.5.0",
     "@prisma/nuxt": "0.3.0",
     "@vueuse/core": "^12.7.0",
     "@vueuse/nuxt": "^12.7.0",
