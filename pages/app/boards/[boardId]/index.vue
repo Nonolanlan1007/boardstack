@@ -12,6 +12,7 @@ import updateCardPosition from "~/utils/updateCardPosition";
 definePageMeta({
   middleware: "auth-only",
   layout: "app",
+  alias: "/app/boards/:boardId/activity",
 });
 
 const route = useRoute();

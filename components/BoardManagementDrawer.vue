@@ -32,6 +32,7 @@ const unsplashResults = ref<{ query: string; results: any[] }>({
 const labelsTableFilters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
+const isActivityDialogOpen = ref<boolean>(false);
 
 const backgroundColor = computed(() =>
   getBackgroundColor(props.board.background),
@@ -534,6 +535,11 @@ async function deleteMember(memberId: string) {
           <p class="mb-6 opacity-50 italic text-center w-full">
             Nothing to show here...
           </p>
+          <Button
+            fluid
+            label="Open Activity"
+            @click="isActivityDialogOpen = true"
+          />
         </div>
         <div v-if="board.current_user_role === 'owner'" class="my-6">
           <h3 class="text-xl font-semibold">Danger Zone</h3>
@@ -1030,4 +1036,8 @@ async function deleteMember(memberId: string) {
       </div>
     </Transition>
   </Drawer>
+
+  <LazyActivityExplorerDialog
+    v-model:is-activity-dialog-open="isActivityDialogOpen"
+  />
 </template>
