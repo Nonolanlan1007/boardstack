@@ -91,6 +91,49 @@ defineRouteMeta({
     summary: "Get board activity logs",
     description: "Get activity logs for a specified board",
     operationId: "getBoardLogs",
+    parameters: [
+      {
+        name: "start",
+        in: "query",
+        description: "The starting index of the logs to fetch",
+        required: false,
+        schema: {
+          type: "integer",
+          example: 0,
+        },
+      },
+      {
+        name: "count",
+        in: "query",
+        description: "The number of logs to fetch",
+        required: false,
+        schema: {
+          type: "integer",
+          example: 10,
+        },
+      },
+      {
+        name: "created_by",
+        in: "query",
+        description: "Filter logs by the user who created them",
+        required: false,
+        schema: {
+          type: "string",
+          format: "uuid",
+          example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
+        },
+      },
+      {
+        name: "action",
+        in: "query",
+        description: "Filter logs by action type",
+        required: false,
+        schema: {
+          type: "string",
+          example: "renamed_board",
+        },
+      },
+    ],
     responses: {
       "200": {
         description: "Activity logs successfully fetched",
