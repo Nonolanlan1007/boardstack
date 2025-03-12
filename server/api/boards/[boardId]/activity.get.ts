@@ -6,8 +6,8 @@ const paramsSchema = z.object({
 });
 
 const queryValidator = z.object({
-  start: z.number().optional(),
-  count: z.number().optional(),
+  start: z.string().optional(),
+  count: z.string().optional(),
   created_by: z.string().optional(),
   action: z.string().optional(),
 });
@@ -62,8 +62,8 @@ export default defineEventHandler(async (event) => {
       action: query.action,
       created_by: query.created_by,
     },
-    skip: query.start ?? 0,
-    take: query.count ?? 10,
+    skip: Number(query.start) || 0,
+    take: Number(query.count) || 10,
     orderBy: {
       created_at: "desc",
     },
