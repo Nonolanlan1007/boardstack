@@ -56,60 +56,6 @@ const allMembers = computed(() => [
   ...props.board.members,
 ]);
 
-function selectAction(log: ActivityLog) {
-  const parent_card = props.board.lists
-    .flatMap((l) => l.cards)
-    .find((c) => c.id === log.parent_card_id);
-
-  switch (log.action) {
-    case "rename_board":
-      return "renamed the board";
-    case "update_board_background":
-      return "updated the background";
-    case "card_created":
-      return `created a card in list '${props.board.lists.find((l) => l.id === log.linked_value)!.title}'`;
-    case "card_deleted":
-      return `deleted a card from list '${props.board.lists.find((l) => l.id === log.linked_value)!.title}'`;
-    case "renamed_card":
-      return `renamed a card`;
-    case "update_card_description":
-      return `updated the description of card '${props.board.lists.flatMap((l) => l.cards).find((c) => c.id === log.parent_card_id)!.title}'`;
-    case "moved_card":
-      return parent_card ? `moved card '${parent_card.title}'` : "moved a card";
-    case "update_assigned_to_card": {
-      const member = allMembers.value.find((l) => l.user_id === log.new_value);
-      return parent_card
-        ? `assigned ${member ? member.full_name : "nobody"} to card '${parent_card!.title}'`
-        : `assigned ${member ? member.full_name : "nobody"} to a card`;
-    }
-    default:
-      return "did an unknown action";
-  }
-}
-
-function selectIcon(action: string) {
-  switch (action) {
-    case "rename_board":
-      return "pi-pen-to-square";
-    case "update_board_background":
-      return "pi-image";
-    case "card_created":
-      return "pi-file-plus";
-    case "card_deleted":
-      return "pi-trash";
-    case "renamed_card":
-      return "pi-pen-to-square";
-    case "update_card_description":
-      return "pi-align-left";
-    case "moved_card":
-      return "pi-arrows-alt";
-    case "update_assigned_to_card":
-      return "pi-user-edit";
-    default:
-      return "pi-wrench";
-  }
-}
-
 async function refresh() {
   const urlParams = new URLSearchParams({
     ...(userFilter.value && { created_by: userFilter.value.user_id }),
@@ -122,6 +68,7 @@ async function refresh() {
   const res = await fetch(
     `/api/boards/${route.params.boardId}/activity?${urlParams.toString()}`,
   );
+  isLoading.value = false;
 
   const data = await res.json();
 
@@ -136,8 +83,6 @@ async function refresh() {
 
   logs.value = data.logs;
   logsCount.value = data.total;
-
-  isLoading.value = false;
 }
 </script>
 
@@ -219,91 +164,14 @@ async function refresh() {
         </div>
       </div>
       <div v-if="!isLoading && logs.length > 0">
-        <Accordion v-if="!isLoading && logs.length > 0">
-          <AccordionPanel
-            v-for="(log, index) in logs"
+        <Accordion>
+          <LogAccordion
+            v-for="(logData, index) in logs"
             :key="index"
-            :value="index"
-          >
-            <AccordionHeader>
-              <span class="flex items-center gap-2 w-full">
-                <i :class="`pi ${selectIcon(log.action)} mr-4`" />
-                <Avatar :image="log.avatar" shape="circle" />
-                <span>
-                  <span class="flex items-center gap-2 w-full">
-                    <span class="font-bold whitespace-nowrap">
-                      {{ log.full_name }}
-                    </span>
-                    <span>
-                      {{ selectAction(log) }}
-                    </span>
-                  </span>
-                  <span>{{ formatDate(log.created_at, true) }}</span>
-                </span>
-              </span>
-            </AccordionHeader>
-            <AccordionContent v-if="log.new_value || log.old_value">
-              <div class="flex gap-2">
-                <i class="pi pi-minus text-red-500 text-sm m-2" />
-                <span class="font-semibold whitespace-nowrap">Before:</span>
-                <span
-                  v-if="log.action === 'moved_card'"
-                  class="whitespace-nowrap"
-                >
-                  {{
-                    board.lists.find((l) => l.id === log.old_value)
-                      ? board.lists.find((l) => l.id === log.old_value)!.title
-                      : log.old_value || "None"
-                  }}
-                </span>
-                <span
-                  v-else-if="log.action === 'update_assigned_to_card'"
-                  class="whitespace-nowrap"
-                >
-                  {{
-                    allMembers.find((m) => m.user_id === log.old_value)
-                      ? allMembers.find((m) => m.user_id === log.old_value)!
-                          .full_name
-                      : log.old_value || "None"
-                  }}
-                </span>
-                <span v-else class="whitespace-nowrap">
-                  {{ log.old_value || "None" }}
-                </span>
-              </div>
-              <div class="flex gap-2">
-                <i class="pi pi-plus text-green-500 text-sm m-2" />
-                <span class="font-semibold whitespace-nowrap">After:</span>
-                <span
-                  v-if="log.action === 'moved_card'"
-                  class="whitespace-nowrap"
-                >
-                  {{
-                    board.lists.find((l) => l.id === log.new_value)
-                      ? board.lists.find((l) => l.id === log.new_value)!.title
-                      : log.new_value || "None"
-                  }}
-                </span>
-                <span
-                  v-else-if="log.action === 'update_assigned_to_card'"
-                  class="whitespace-nowrap"
-                >
-                  {{
-                    allMembers.find((m) => m.user_id === log.new_value)
-                      ? allMembers.find((m) => m.user_id === log.new_value)!
-                          .full_name
-                      : log.new_value || "None"
-                  }}
-                </span>
-                <span v-else class="whitespace-nowrap">
-                  {{ log.new_value || "None" }}
-                </span>
-              </div>
-            </AccordionContent>
-            <AccordionContent v-else>
-              <p>Details are unavailable.</p>
-            </AccordionContent>
-          </AccordionPanel>
+            :log-data="logData"
+            :index="index"
+            :board="board"
+          />
         </Accordion>
         <Paginator
           v-model:first="firstElement"
