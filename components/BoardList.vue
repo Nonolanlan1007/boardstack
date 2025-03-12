@@ -91,7 +91,7 @@ async function onCardDrop(event: VueDndDropEvent) {
       :get-child-payload="(index: number) => list.cards[index]"
       drag-class="card-ghost"
       drop-class="card-ghost-drop"
-      class="flex items-center flex-col gap-2 overflow-y-auto h-[calc(100vh-200px)] board-cards-list"
+      class="h-[calc(100vh-200px)] overflow-y-scroll board-cards-list"
       :drop-placeholder="{
         className: 'drop-preview',
         animationDuration: '150',
