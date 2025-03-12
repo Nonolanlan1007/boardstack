@@ -77,12 +77,21 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  return logs.map((log) => ({
-    ...log,
-    user: undefined,
-    full_name: log.user.full_name,
-    avatar: getGravatar(log.user.email),
-  }));
+  return {
+    total: await prisma.activity_logs.count({
+      where: {
+        parent_board_id: boardId,
+        action: query.action,
+        created_by: query.created_by,
+      },
+    }),
+    logs: logs.map((log) => ({
+      ...log,
+      user: undefined,
+      full_name: log.user.full_name,
+      avatar: getGravatar(log.user.email),
+    })),
+  };
 });
 
 defineRouteMeta({
