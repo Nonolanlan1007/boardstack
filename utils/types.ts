@@ -32,3 +32,18 @@ export type SummarizedBoard = boards & {
 export interface UserProfile extends Omit<users, "password"> {
   avatar: string;
 }
+
+export interface ActivityLog {
+  id: string;
+  parent_board_id: string | null;
+  parent_card_id: string | null;
+  action: string;
+  created_by: string;
+  old_value: string | null;
+  new_value: string | null;
+  linked_value: string | null;
+  full_name: string;
+  avatar: string;
+  created_at: string;
+  updated_at: string;
+}
