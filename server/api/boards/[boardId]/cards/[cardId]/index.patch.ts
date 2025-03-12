@@ -140,7 +140,6 @@ export default defineEventHandler(async (event) => {
       ...(body.description !== undefined && { description: body.description }),
       ...(body.parent_list && { parent_list: body.parent_list }),
       ...(body.position !== undefined && { position: body.position }),
-      ...(body.title && { title: body.title }),
       ...(body.assigned_to !== undefined && { assigned_to: body.assigned_to }),
     },
     include: {
