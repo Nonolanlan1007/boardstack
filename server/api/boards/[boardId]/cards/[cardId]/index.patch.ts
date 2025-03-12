@@ -1,6 +1,8 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import type { activity_logsCreateManyInput } from "@prisma/client";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -149,6 +151,47 @@ export default defineEventHandler(async (event) => {
         },
       },
     },
+  });
+
+  const actions: Omit<
+    activity_logsCreateManyInput,
+    "id" | "parent_board_id" | "created_by"
+  >[] = [];
+
+  if (card.title !== newCard.title)
+    actions.push({
+      action: "renamed_card",
+      old_value: card.title,
+      new_value: newCard.title,
+    });
+
+  if (card.description !== newCard.description)
+    actions.push({
+      action: "update_card_description",
+    });
+
+  if (card.parent_list !== newCard.parent_list)
+    actions.push({
+      action: "moved_card",
+      old_value: card.parent_list,
+      new_value: newCard.parent_list,
+    });
+
+  if (card.assigned_to !== newCard.assigned_to)
+    actions.push({
+      action: "update_assigned_to_card",
+      old_value: card.assigned_to,
+      new_value: newCard.assigned_to,
+    });
+
+  await prisma.activity_logs.createMany({
+    data: actions.map((action) => ({
+      ...action,
+      id: uuid(),
+      parent_board_id: boardId,
+      parent_card_id: cardId,
+      created_by: user.id,
+    })) as activity_logsCreateManyInput[],
   });
 
   broadcastSSE(
