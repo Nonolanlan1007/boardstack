@@ -24,6 +24,7 @@ const boardsStore = useBoardsStore();
 const boardDrawerStep = ref<number>(0);
 const newBoardName = ref<string>("");
 const isLoading = ref<boolean>(false);
+const logs = ref<ActivityLog[]>([]);
 const unsplashQuery = ref<string>("");
 const unsplashResults = ref<{ query: string; results: any[] }>({
   query: "",
@@ -408,6 +409,27 @@ async function deleteMember(memberId: string) {
     life: 3000,
   });
 }
+
+async function refreshLogs() {
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/activity?start=0&count=3`,
+  );
+  isLoading.value = false;
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  logs.value = data.logs;
+}
 </script>
 
 <template>
@@ -425,6 +447,7 @@ async function deleteMember(memberId: string) {
         };
       }
     "
+    @show="refreshLogs"
   >
     <template #header>
       <Button
@@ -532,14 +555,30 @@ async function deleteMember(memberId: string) {
         </div>
         <div class="my-6">
           <h3 class="text-xl font-semibold">Activity</h3>
-          <p class="mb-6 opacity-50 italic text-center w-full">
-            Nothing to show here...
-          </p>
-          <Button
-            fluid
-            label="Open Activity"
-            @click="isActivityDialogOpen = true"
-          />
+          <Accordion v-if="!isLoading && logs.length > 0">
+            <LogAccordion
+              v-for="(logData, index) in logs"
+              :key="index"
+              :log-data="logData"
+              :index="index"
+              :board="board"
+            />
+          </Accordion>
+          <div
+            v-else-if="!isLoading"
+            class="flex items-center justify-center my-8"
+          >
+            <p>No recent activity</p>
+          </div>
+          <div v-else class="flex items-center justify-center my-8">
+            <i class="pi pi-spinner animate-spin" />
+          </div>
+          <BoardDrawerButton @click="isActivityDialogOpen = true">
+            <template #icon>
+              <i class="pi pi-history w-8" />
+            </template>
+            <template #default> Open Activity </template>
+          </BoardDrawerButton>
         </div>
         <div v-if="board.current_user_role === 'owner'" class="my-6">
           <h3 class="text-xl font-semibold">Danger Zone</h3>
