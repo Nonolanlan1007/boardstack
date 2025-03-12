@@ -10,6 +10,7 @@ const queryValidator = z.object({
   count: z.string().optional(),
   created_by: z.string().optional(),
   action: z.string().optional(),
+  parent_card: z.string().optional(),
 });
 
 export default defineEventHandler(async (event) => {
@@ -61,6 +62,7 @@ export default defineEventHandler(async (event) => {
       parent_board_id: boardId,
       action: query.action,
       created_by: query.created_by,
+      parent_card_id: query.parent_card,
     },
     skip: Number(query.start) || 0,
     take: Number(query.count) || 10,
@@ -140,6 +142,17 @@ defineRouteMeta({
         schema: {
           type: "string",
           example: "renamed_board",
+        },
+      },
+      {
+        name: "parent_card",
+        in: "query",
+        description: "Filter logs by card",
+        required: false,
+        schema: {
+          type: "string",
+          format: "uuid",
+          example: "65ac72b5-50b0-48cd-9652-2e88a23aaa98",
         },
       },
     ],

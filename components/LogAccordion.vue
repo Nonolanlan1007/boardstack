@@ -13,37 +13,6 @@ const allMembers = computed(() => [
   },
   ...props.board.members,
 ]);
-
-function selectAction(log: ActivityLog) {
-  const parent_card = props.board.lists
-    .flatMap((l) => l.cards)
-    .find((c) => c.id === log.parent_card_id);
-
-  switch (log.action) {
-    case "rename_board":
-      return "renamed the board";
-    case "update_board_background":
-      return "updated the background";
-    case "card_created":
-      return `created a card in list '${props.board.lists.find((l) => l.id === log.linked_value)!.title}'`;
-    case "card_deleted":
-      return `deleted a card from list '${props.board.lists.find((l) => l.id === log.linked_value)!.title}'`;
-    case "renamed_card":
-      return `renamed a card`;
-    case "update_card_description":
-      return `updated the description of card '${props.board.lists.flatMap((l) => l.cards).find((c) => c.id === log.parent_card_id)!.title}'`;
-    case "moved_card":
-      return parent_card ? `moved card '${parent_card.title}'` : "moved a card";
-    case "update_assigned_to_card": {
-      const member = allMembers.value.find((l) => l.user_id === log.new_value);
-      return parent_card
-        ? `assigned ${member ? member.full_name : "nobody"} to card '${parent_card!.title}'`
-        : `assigned ${member ? member.full_name : "nobody"} to a card`;
-    }
-    default:
-      return "did an unknown action";
-  }
-}
 </script>
 
 <template>
@@ -57,7 +26,7 @@ function selectAction(log: ActivityLog) {
             <span class="font-bold">
               {{ logData.full_name }}
             </span>
-            {{ selectAction(logData) }}
+            {{ selectAction(logData, board) }}
           </p>
           <span>{{ formatDate(logData.created_at, true) }}</span>
         </div>

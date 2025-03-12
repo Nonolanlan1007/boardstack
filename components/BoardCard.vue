@@ -12,11 +12,11 @@ const toast = useToast();
 const route = useRoute();
 const { copy } = useClipboard();
 
-const { user } = useUserStore();
-
 const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
+const logs = ref<ActivityLog[]>([]);
 const showCard = ref<boolean>(false);
+const showFullActivity = ref<boolean>(false);
 const showFullDesc = ref<boolean>(
   !props.card.description || props.card.description.length < 600,
 );
@@ -36,8 +36,11 @@ const allMembers = computed(() => [
   },
   ...props.parentBoard.members,
 ]);
-const cardCreator = computed(() =>
-  allMembers.value.find((member) => member.user_id === props.card.created_by),
+const participants = computed(() =>
+  logs.value.filter(
+    (log, i, arr) =>
+      arr.findIndex((l) => l.created_by === log.created_by) === i,
+  ),
 );
 const contextMenuItems = computed((): MenuItem[] => [
   {
@@ -315,6 +318,31 @@ async function updateAssigned(userId: string | null) {
   });
 }
 
+async function refreshLogs() {
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/activity?start=0&count=30&parent_card=${props.card.id}`,
+  );
+  isLoading.value = false;
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  logs.value = (data.logs as ActivityLog[]).sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
+
+  if (logs.value.length <= 5) showFullActivity.value = true;
+}
+
 watch(route, (value) => {
   if (value.query.card && value.query.card === props.card.id)
     showCard.value = true;
@@ -473,6 +501,7 @@ watch(props, (value) => {
         navigateTo(route.path);
       }
     "
+    @show="refreshLogs"
   >
     <template #header>
       <div>
@@ -566,17 +595,37 @@ watch(props, (value) => {
             Activity
           </label>
           <div class="px-8 py-4 border-l dark:border-surface-700 ml-2 group">
-            <div v-if="cardCreator" class="flex items-center gap-1 my-2">
-              <Avatar :image="cardCreator.avatar" shape="circle" />
+            <div
+              v-for="(logData, index) in logs.slice(
+                0,
+                showFullActivity ? 15 : 5,
+              )"
+              :key="index"
+              class="flex items-center gap-2 my-2"
+            >
+              <i :class="`pi ${selectIcon(logData.action)} mr-4`" />
+              <Avatar :image="logData.avatar" shape="circle" />
               <div>
                 <p>
-                  <span class="font-bold">{{ cardCreator.full_name }}</span>
-                  created this card
+                  <span class="font-bold">{{ logData.full_name }}</span>
+                  {{ selectAction(logData, parentBoard) }}
                 </p>
                 <p class="text-xs">
-                  {{ formatDate(card.created_at, true) }}
+                  {{ formatDate(logData.created_at, true) }}
                 </p>
               </div>
+            </div>
+            <div v-if="!showFullActivity" class="relative">
+              <Button
+                fluid
+                label="Show full activity"
+                variant="text"
+                class="!bg-surface-50 dark:!bg-surface-800 mt-2 z-10 transition-all group-hover:!brightness-90 dark:group-hover:!brightness-110"
+                @click="showFullActivity = true"
+              />
+              <span
+                class="absolute w-full h-[200%] bottom-0 left-0 bg-gradient-to-t from-surface-0 dark:from-surface-900 from-60% to-transparent"
+              />
             </div>
           </div>
         </div>
@@ -588,13 +637,26 @@ watch(props, (value) => {
             Participants
           </label>
           <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
-            <div v-if="cardCreator" class="flex items-center gap-1">
-              <Avatar
-                :image="cardCreator.avatar"
-                shape="circle"
-                class="!h-6 !w-6"
-              />
-              <p>{{ cardCreator.full_name }}</p>
+            <div v-if="participants.length > 0" class="flex items-center gap-1">
+              <AvatarGroup>
+                <Avatar
+                  v-for="user in participants"
+                  :key="user.id"
+                  :image="user.avatar"
+                  shape="circle"
+                  class="!h-6 !w-6"
+                />
+              </AvatarGroup>
+              <p>
+                <span class="font-semibold">
+                  {{ participants[0].full_name }}
+                </span>
+                {{
+                  participants.length > 1
+                    ? ` and ${participants.length - 1} other${participants.length > 2 ? "s" : ""}`
+                    : ""
+                }}
+              </p>
             </div>
           </div>
         </div>
