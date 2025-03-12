@@ -329,68 +329,67 @@ watch(props, (value) => {
 </script>
 
 <template>
-  <NuxtLink :to="`${route.path}?card=${card.id}`">
-    <Card
-      class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none board-card"
-      unstyled
-      @contextmenu="onCardRightClick($event)"
-    >
-      <template #content>
-        <div class="flex gap-2 justify-between">
-          {{ card.title }}
-          <Avatar
-            v-if="card.assigned_to"
-            v-tooltip.top="{
-              value: allMembers.find((m) => m.user_id === card.assigned_to)!
-                .full_name,
-              pt: {
-                text: '!text-xs',
-              },
-            }"
-            shape="circle"
-            :image="
-              allMembers.find((m) => m.user_id === card.assigned_to)!.avatar
-            "
-          />
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex items-center gap-2 flex-wrap mt-1">
-          <i
-            v-if="card.description"
-            class="pi pi-align-left text-xs opacity-75"
-          />
-          <Tag
-            v-for="label in card.labels
-              .map((label) => {
-                const data = parentBoard.labels.find(
-                  (l) => l.id === label.label_id,
-                );
-                return {
-                  label: data!.label,
-                  color: data!.color,
-                  id: label.label_id,
-                };
-              })
-              .slice(0, 3)"
-            :key="label.id"
-            unstyled
-            class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
-            :style="`background: ${label.color};`"
-          >
-            <span class="text-xs">{{ label.label }}</span>
-          </Tag>
-          <Tag
-            v-if="card.labels.length > 3"
-            unstyled
-            class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
-          >
-            <span class="text-xs">+{{ card.labels.length - 3 }}</span>
-          </Tag>
-        </div>
-      </template>
-    </Card>
-  </NuxtLink>
+  <Card
+    class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none board-card"
+    unstyled
+    @contextmenu="onCardRightClick($event)"
+    @click="navigateTo(`${route.path}?card=${card.id}`)"
+  >
+    <template #content>
+      <div class="flex gap-2 justify-between">
+        {{ card.title }}
+        <Avatar
+          v-if="card.assigned_to"
+          v-tooltip.top="{
+            value: allMembers.find((m) => m.user_id === card.assigned_to)!
+              .full_name,
+            pt: {
+              text: '!text-xs',
+            },
+          }"
+          shape="circle"
+          :image="
+            allMembers.find((m) => m.user_id === card.assigned_to)!.avatar
+          "
+        />
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex items-center gap-2 flex-wrap mt-1">
+        <i
+          v-if="card.description"
+          class="pi pi-align-left text-xs opacity-75"
+        />
+        <Tag
+          v-for="label in card.labels
+            .map((label) => {
+              const data = parentBoard.labels.find(
+                (l) => l.id === label.label_id,
+              );
+              return {
+                label: data!.label,
+                color: data!.color,
+                id: label.label_id,
+              };
+            })
+            .slice(0, 3)"
+          :key="label.id"
+          unstyled
+          class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
+          :style="`background: ${label.color};`"
+        >
+          <span class="text-xs">{{ label.label }}</span>
+        </Tag>
+        <Tag
+          v-if="card.labels.length > 3"
+          unstyled
+          class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
+        >
+          <span class="text-xs">+{{ card.labels.length - 3 }}</span>
+        </Tag>
+      </div>
+    </template>
+  </Card>
 
   <ContextMenu ref="contextMenu" :model="contextMenuItems">
     <template #item="{ item, props }">
