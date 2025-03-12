@@ -330,7 +330,7 @@ watch(props, (value) => {
 
 <template>
   <Card
-    class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none board-card"
+    class="w-full min-h-16 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 my-2 rounded-md select-none board-card"
     unstyled
     @contextmenu="onCardRightClick($event)"
     @click="navigateTo(`${route.path}?card=${card.id}`)"
