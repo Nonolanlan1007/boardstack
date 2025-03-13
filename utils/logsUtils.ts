@@ -34,6 +34,8 @@ export function selectIcon(action: string) {
       return "pi-tag";
     case "label_deleted":
       return "pi-tag";
+    case "list_created":
+      return "pi-list";
     default:
       return "pi-wrench";
   }
@@ -94,6 +96,8 @@ export function selectAction(log: ActivityLog, board: DetailedBoard) {
     }
     case "label_deleted":
       return `deleted label '${log.linked_value}'`;
+    case "list_created":
+      return `created a list named '${log.new_value}'`;
     default:
       return "did an unknown action";
   }
