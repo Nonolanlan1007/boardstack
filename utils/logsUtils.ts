@@ -26,6 +26,14 @@ export function selectIcon(action: string) {
       return "pi-user-minus";
     case "invitation_rejected":
       return "pi-user-minus";
+    case "label_created":
+      return "pi-tag";
+    case "label_label_updated":
+      return "pi-tag";
+    case "label_color_updated":
+      return "pi-tag";
+    case "label_deleted":
+      return "pi-tag";
     default:
       return "pi-wrench";
   }
@@ -76,6 +84,16 @@ export function selectAction(log: ActivityLog, board: DetailedBoard) {
       return `deleted the invitation of ${log.linked_value}`;
     case "invitation_rejected":
       return "rejected his invitation";
+    case "label_created":
+      return `created a label named '${log.new_value}'`;
+    case "label_label_updated":
+      return "updated a label";
+    case "label_color_updated": {
+      const label = board.labels.find((l) => l.id === log.linked_value);
+      return `updated the color of the label '${label ? label.label : "unknown"}'`;
+    }
+    case "label_deleted":
+      return `deleted label '${log.linked_value}'`;
     default:
       return "did an unknown action";
   }

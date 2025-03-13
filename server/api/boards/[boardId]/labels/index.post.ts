@@ -72,6 +72,17 @@ export default defineEventHandler(async (event) => {
     },
   });
 
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "label_created",
+      created_by: user.id,
+      new_value: newLabel.label,
+      linked_value: newLabel.id,
+    },
+  });
+
   broadcastSSE(
     `boards/${boardId}`,
     JSON.stringify({
