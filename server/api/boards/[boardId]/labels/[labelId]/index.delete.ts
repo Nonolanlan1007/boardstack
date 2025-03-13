@@ -1,6 +1,7 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -61,6 +62,16 @@ export default defineEventHandler(async (event) => {
 
   await prisma.board_labels.delete({
     where: { id: labelId },
+  });
+
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "label_deleted",
+      created_by: user.id,
+      linked_value: label.label,
+    },
   });
 
   broadcastSSE(
