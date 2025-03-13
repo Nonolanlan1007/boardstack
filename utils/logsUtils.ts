@@ -36,6 +36,10 @@ export function selectIcon(action: string) {
       return "pi-tag";
     case "list_created":
       return "pi-list";
+    case "member_role_updated":
+      return "pi-user-edit";
+    case "member_deleted":
+      return "pi-user-minus";
     default:
       return "pi-wrench";
   }
@@ -98,6 +102,12 @@ export function selectAction(log: ActivityLog, board: DetailedBoard) {
       return `deleted label '${log.linked_value}'`;
     case "list_created":
       return `created a list named '${log.new_value}'`;
+    case "member_role_updated": {
+      const member = allMembers.find((l) => l.user_id === log.linked_value);
+      return `updated the role of '${member ? member.full_name : "unknown"}'`;
+    }
+    case "member_deleted":
+      return `kicked ${log.old_value} from the board`;
     default:
       return "did an unknown action";
   }
