@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
   broadcastSSE(
     `boards/${boardId}`,
     JSON.stringify({
-      type: "label_delete",
+      type: "label_deleted",
       data: labelId,
     }),
   );
