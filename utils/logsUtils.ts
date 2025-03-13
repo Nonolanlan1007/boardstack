@@ -16,6 +16,16 @@ export function selectIcon(action: string) {
       return "pi-arrows-alt";
     case "update_assigned_to_card":
       return "pi-user-edit";
+    case "invitation_created":
+      return "pi-user-plus";
+    case "invitation_accepted":
+      return "pi-user-plus";
+    case "invitation_role_updated":
+      return "pi-user-edit";
+    case "invitation_deleted":
+      return "pi-user-minus";
+    case "invitation_rejected":
+      return "pi-user-minus";
     default:
       return "pi-wrench";
   }
@@ -56,6 +66,16 @@ export function selectAction(log: ActivityLog, board: DetailedBoard) {
         ? `assigned ${member ? member.full_name : "nobody"} to card '${parent_card!.title}'`
         : `assigned ${member ? member.full_name : "nobody"} to a card`;
     }
+    case "invitation_created":
+      return `invited ${log.new_value} to join the board`;
+    case "invitation_accepted":
+      return "accepted his invitation";
+    case "invitation_role_updated":
+      return `updated the role of ${log.linked_value}`;
+    case "invitation_deleted":
+      return `deleted the invitation of ${log.linked_value}`;
+    case "invitation_rejected":
+      return "rejected his invitation";
     default:
       return "did an unknown action";
   }

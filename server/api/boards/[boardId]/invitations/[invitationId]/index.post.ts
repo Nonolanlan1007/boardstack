@@ -72,6 +72,15 @@ export default defineEventHandler(async (event) => {
     where: { parent_board: boardId, id: invitationId },
   });
 
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "invitation_accepted",
+      created_by: user.id,
+    },
+  });
+
   broadcastSSE(
     `boards/${boardId}`,
     JSON.stringify({
