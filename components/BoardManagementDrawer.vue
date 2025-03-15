@@ -11,6 +11,7 @@ const toast = useToast();
 const { copy } = useClipboard();
 const route = useRoute();
 const boardsStore = useBoardsStore();
+const confirm = useConfirm();
 
 /**
  * 0 -> Default menu
@@ -38,6 +39,42 @@ const isActivityDialogOpen = ref<boolean>(false);
 const backgroundColor = computed(() =>
   getBackgroundColor(props.board.background),
 );
+
+const confirmBoardDeletion = () => {
+  confirm.require({
+    group: "actionToBeConfirmed",
+    message: "This action cannot be undone and will immediately take effect!",
+    header: "Are you sure you want to proceed?",
+    rejectProps: {
+      label: "Cancel",
+      severity: "secondary",
+      text: true,
+    },
+    acceptProps: {
+      label: "Delete Board",
+      severity: "danger",
+      text: true,
+    },
+    accept: async () => {
+      const res = await fetch(`/api/boards/${route.params.boardId}`, {
+        method: "DELETE",
+      }).catch((res) => res);
+
+      if (!res.ok) {
+        const data = await res.json();
+
+        return toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: `${res.status} - ${data.message}`,
+          life: 5000,
+        });
+      }
+
+      setTimeout(() => window.open("/app", "_self"), 200);
+    },
+  });
+};
 
 function copyBoardId() {
   copy(props.board.id);
@@ -582,7 +619,7 @@ async function refreshLogs() {
         </div>
         <div v-if="board.current_user_role === 'owner'" class="my-6">
           <h3 class="text-xl font-semibold">Danger Zone</h3>
-          <BoardDrawerButton variant="danger">
+          <BoardDrawerButton variant="danger" @click="confirmBoardDeletion()">
             <template #icon>
               <i class="pi pi-trash w-8" />
             </template>
@@ -1075,6 +1112,8 @@ async function refreshLogs() {
       </div>
     </Transition>
   </Drawer>
+
+  <ConfirmDialog group="actionToBeConfirmed" />
 
   <LazyActivityExplorerDialog
     v-model:is-activity-dialog-open="isActivityDialogOpen"
