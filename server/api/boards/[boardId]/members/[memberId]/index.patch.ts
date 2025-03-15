@@ -1,6 +1,7 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -83,6 +84,18 @@ export default defineEventHandler(async (event) => {
           email: true,
         },
       },
+    },
+  });
+
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "member_role_updated",
+      created_by: user.id,
+      old_value: member.role,
+      new_value: newMember.role,
+      linked_value: newMember.user_id,
     },
   });
 

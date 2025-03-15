@@ -1,6 +1,7 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -70,6 +71,18 @@ export default defineEventHandler(async (event) => {
     where: { parent_board: boardId, id: invitationId },
     data: {
       role: body.role,
+    },
+  });
+
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "invitation_role_updated",
+      created_by: user.id,
+      old_value: invitation.role,
+      new_value: newInvite.role,
+      linked_value: newInvite.email,
     },
   });
 

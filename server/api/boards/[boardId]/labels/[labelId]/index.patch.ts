@@ -1,6 +1,7 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -82,6 +83,32 @@ export default defineEventHandler(async (event) => {
       ...(body.color !== undefined && { color: "#" + body.color }),
     },
   });
+
+  if (newLabel.label !== label.label)
+    await prisma.activity_logs.create({
+      data: {
+        id: uuid(),
+        parent_board_id: boardId,
+        action: "label_label_updated",
+        created_by: user.id,
+        old_value: label.label,
+        new_value: newLabel.label,
+        linked_value: newLabel.id,
+      },
+    });
+
+  if (newLabel.color !== label.color)
+    await prisma.activity_logs.create({
+      data: {
+        id: uuid(),
+        parent_board_id: boardId,
+        action: "label_color_updated",
+        created_by: user.id,
+        old_value: label.color,
+        new_value: newLabel.color,
+        linked_value: newLabel.id,
+      },
+    });
 
   broadcastSSE(
     `boards/${boardId}`,

@@ -1,6 +1,7 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -52,6 +53,13 @@ export default defineEventHandler(async (event) => {
 
   const member = await prisma.board_members.findFirst({
     where: { parent_board: boardId, id: memberId },
+    include: {
+      users: {
+        select: {
+          full_name: true,
+        },
+      },
+    },
   });
 
   if (!member)
@@ -62,6 +70,16 @@ export default defineEventHandler(async (event) => {
 
   await prisma.board_members.delete({
     where: { parent_board: boardId, id: memberId },
+  });
+
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "member_deleted",
+      created_by: user.id,
+      old_value: member.users.full_name,
+    },
   });
 
   broadcastSSE(

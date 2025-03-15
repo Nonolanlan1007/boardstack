@@ -10,27 +10,38 @@ const props = defineProps<{
 
 const toast = useToast();
 const route = useRoute();
-
-const { user } = useUserStore();
+const { copy } = useClipboard();
 
 const openRenameDialog = ref<boolean>(false);
 const contextMenu = ref();
+const logs = ref<ActivityLog[]>([]);
 const showCard = ref<boolean>(false);
-const showFullDesc = ref<boolean>(false);
+const showFullActivity = ref<boolean>(false);
+const showFullDesc = ref<boolean>(
+  !props.card.description || props.card.description.length < 600,
+);
 const editDesc = ref<boolean>(false);
 const cardTitle = ref<string>(props.card.title);
+const cardDescription = ref<string>(props.card.description || "");
+const cardLinkCopied = ref<boolean>(false);
 
 if (route.query.card && route.query.card === props.card.id)
   showCard.value = true;
 
-const cardCreator = computed(() =>
-  [...props.parentBoard.members, user!].find((member) =>
-    "user_id" in member
-      ? member.user_id === props.card.created_by
-      : member.id === props.card.created_by,
+const allMembers = computed(() => [
+  {
+    user_id: props.parentBoard.owner.id,
+    full_name: props.parentBoard.owner.full_name,
+    avatar: props.parentBoard.owner.avatar,
+  },
+  ...props.parentBoard.members,
+]);
+const participants = computed(() =>
+  logs.value.filter(
+    (log, i, arr) =>
+      arr.findIndex((l) => l.created_by === log.created_by) === i,
   ),
 );
-
 const contextMenuItems = computed((): MenuItem[] => [
   {
     label: "Open card",
@@ -220,59 +231,193 @@ async function editLabels(newLabels: string[]) {
   }
 }
 
+async function updateDesc() {
+  cardDescription.value = cardDescription.value.trim();
+
+  if (cardDescription.value === props.card.description)
+    return (editDesc.value = false);
+
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        description:
+          !cardDescription.value || cardDescription.value === "<p></p>"
+            ? null
+            : cardDescription.value.replace(/&nbsp;/g, " "),
+      }),
+    },
+  ).catch((res) => res);
+  isLoading.value = false;
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  editDesc.value = false;
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: `Description updated`,
+    life: 3000,
+  });
+}
+
+async function shareCard() {
+  await copy(window.location.href);
+
+  cardLinkCopied.value = true;
+  setTimeout(() => (cardLinkCopied.value = false), 3000);
+}
+
+async function updateAssigned(userId: string | null) {
+  if (userId === props.card.assigned_to) return;
+
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId as string}/cards/${props.card.id}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assigned_to: userId,
+      }),
+    },
+  ).catch((res) => res);
+  isLoading.value = false;
+
+  if (!res.ok) {
+    const data = await res.json();
+
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  editDesc.value = false;
+
+  toast.add({
+    severity: "success",
+    summary: "Success",
+    detail: `Card updated`,
+    life: 3000,
+  });
+}
+
+async function refreshLogs() {
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/activity?start=0&count=30&parent_card=${props.card.id}`,
+  );
+  isLoading.value = false;
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  logs.value = (data.logs as ActivityLog[]).sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
+
+  if (logs.value.length <= 5) showFullActivity.value = true;
+}
+
 watch(route, (value) => {
   if (value.query.card && value.query.card === props.card.id)
     showCard.value = true;
 });
 
-watch(props, (value) => (cardTitle.value = value.card.title));
+watch(props, (value) => {
+  cardTitle.value = value.card.title;
+  cardDescription.value = value.card.description || "";
+  if (!props.card.description || props.card.description.length < 600)
+    showFullDesc.value = true;
+});
 </script>
 
 <template>
-  <NuxtLink :to="`${route.path}?card=${card.id}`">
-    <Card
-      class="w-full min-h-15 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 rounded-md select-none board-card"
-      unstyled
-      @contextmenu="onCardRightClick($event)"
-    >
-      <template #content>{{ card.title }}</template>
-      <template #footer>
-        <div class="flex items-center gap-2 flex-wrap mt-1">
-          <i
-            v-if="card.description"
-            class="pi pi-align-left text-xs opacity-75"
-          />
-          <Tag
-            v-for="label in card.labels
-              .map((label) => {
-                const data = parentBoard.labels.find(
-                  (l) => l.id === label.label_id,
-                );
-                return {
-                  label: data!.label,
-                  color: data!.color,
-                  id: label.label_id,
-                };
-              })
-              .slice(0, 3)"
-            :key="label.id"
-            unstyled
-            class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
-            :style="`background: ${label.color};`"
-          >
-            <span class="text-xs">{{ label.label }}</span>
-          </Tag>
-          <Tag
-            v-if="card.labels.length > 3"
-            unstyled
-            class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
-          >
-            <span class="text-xs">+{{ card.labels.length - 3 }}</span>
-          </Tag>
-        </div>
-      </template>
-    </Card>
-  </NuxtLink>
+  <Card
+    class="w-full min-h-16 hover:bg-opacity-30 cursor-pointer bg-white dark:bg-black bg-opacity-15 dark:bg-opacity-15 backdrop-blur p-4 my-2 rounded-md select-none board-card"
+    unstyled
+    @contextmenu="onCardRightClick($event)"
+    @click="navigateTo(`${route.path}?card=${card.id}`)"
+  >
+    <template #content>
+      <div class="flex gap-2 justify-between">
+        {{ card.title }}
+        <Avatar
+          v-if="card.assigned_to"
+          v-tooltip.top="{
+            value: allMembers.find((m) => m.user_id === card.assigned_to)!
+              .full_name,
+            pt: {
+              text: '!text-xs',
+            },
+          }"
+          shape="circle"
+          :image="
+            allMembers.find((m) => m.user_id === card.assigned_to)!.avatar
+          "
+        />
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex items-center gap-2 flex-wrap mt-1">
+        <i
+          v-if="card.description"
+          class="pi pi-align-left text-xs opacity-75"
+        />
+        <Tag
+          v-for="label in card.labels
+            .map((label) => {
+              const data = parentBoard.labels.find(
+                (l) => l.id === label.label_id,
+              );
+              return {
+                label: data!.label,
+                color: data!.color,
+                id: label.label_id,
+              };
+            })
+            .slice(0, 3)"
+          :key="label.id"
+          unstyled
+          class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
+          :style="`background: ${label.color};`"
+        >
+          <span class="text-xs">{{ label.label }}</span>
+        </Tag>
+        <Tag
+          v-if="card.labels.length > 3"
+          unstyled
+          class="text-black dark:text-white bg-white dark:bg-black bg-opacity-50 dark:bg-opacity-50 text-center flex items-center justify-center py-1 px-2 font-semibold rounded-md"
+        >
+          <span class="text-xs">+{{ card.labels.length - 3 }}</span>
+        </Tag>
+      </div>
+    </template>
+  </Card>
 
   <ContextMenu ref="contextMenu" :model="contextMenuItems">
     <template #item="{ item, props }">
@@ -356,6 +501,7 @@ watch(props, (value) => (cardTitle.value = value.card.title));
         navigateTo(route.path);
       }
     "
+    @show="refreshLogs"
   >
     <template #header>
       <div>
@@ -368,122 +514,251 @@ watch(props, (value) => (cardTitle.value = value.card.title));
             (value) => renameCard({ valid: true, states: { title: { value } } })
           "
         />
-        <div v-if="cardCreator" class="flex items-center gap-1 my-2">
-          <Avatar
-            :image="cardCreator.avatar"
-            shape="circle"
-            class="!h-6 !w-6"
-          />
-          <p>{{ cardCreator.full_name }}</p>
-        </div>
       </div>
     </template>
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
+    <div class="grid grid-cols-1 md:grid-cols-6 w-full">
       <div class="md:col-span-4">
         <div class="flex flex-col gap-1 w-full mb-2">
-          <label>Description</label>
-          <div
-            v-if="card.description"
-            :class="
-              cn(
-                'relative rounded',
-                !editDesc ? 'border dark:border-surface-800' : '',
-              )
-            "
-          >
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-align-left text-lg" />
+            Description
+          </label>
+          <div v-if="card.description || editDesc">
             <div
               v-if="!editDesc"
-              @click="
-                () => {
-                  if (
-                    showFullDesc &&
-                    parentBoard.current_user_role !== 'reader'
-                  )
-                    editDesc = true;
-                }
-              "
+              class="px-8 py-4 border-l dark:border-surface-700 ml-2 group"
             >
-              <MDC
-                :value="card.description"
-                :class="
-                  cn(
-                    'p-4',
-                    !showFullDesc
-                      ? 'max-h-64 overflow-clip'
-                      : parentBoard.current_user_role === 'reader'
-                        ? ''
-                        : 'cursor-text',
-                  )
+              <div
+                @click="
+                  () => {
+                    if (
+                      showFullDesc &&
+                      parentBoard.current_user_role !== 'reader'
+                    )
+                      editDesc = true;
+                    else if (!showFullDesc) showFullDesc = true;
+                  }
                 "
-              />
+              >
+                <MDC
+                  :value="
+                    showFullDesc
+                      ? card.description || ''
+                      : card.description!.slice(0, 600) + '...'
+                  "
+                  class="prose dark:prose-invert [&>.ql-align-center]:text-center [&>.ql-align-right]:text-right !max-w-none cursor-pointer"
+                />
+              </div>
+              <div
+                v-if="
+                  !showFullDesc &&
+                  card.description &&
+                  card.description.length > 600
+                "
+                class="relative"
+              >
+                <Button
+                  fluid
+                  label="Show full description"
+                  variant="text"
+                  class="!bg-surface-50 dark:!bg-surface-800 mt-2 z-10 transition-all group-hover:!brightness-90 dark:group-hover:!brightness-110"
+                  @click="showFullDesc = true"
+                />
+                <span
+                  class="absolute w-full h-[200%] bottom-0 left-0 bg-gradient-to-t from-surface-0 dark:from-surface-900 from-60% to-transparent"
+                />
+              </div>
             </div>
-            <div v-else>
-              <Editor
-                name="description"
-                editor-style="height: 320px;"
-                :default-value="card.description || ''"
-              />
+            <div v-else class="p-4">
+              <Editor v-model="cardDescription" name="description" />
               <div class="flex items-center justify-end w-full gap-2 my-2">
                 <Button
                   variant="outlined"
                   label="Cancel"
-                  @click="
-                    () => {
-                      editDesc = false;
-                    }
-                  "
+                  @click="editDesc = false"
                 />
-                <Button label="Save" />
+                <Button label="Save" :loading="isLoading" @click="updateDesc" />
               </div>
-            </div>
-            <div
-              v-if="!showFullDesc"
-              class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-surface-50 dark:from-surface-800 dark:brightness-50 hover:dark:from-surface-950 hover:from-surface-100 from-75% to-transparent h-32 flex items-center justify-center cursor-pointer transition-all"
-              @click="showFullDesc = true"
-            >
-              <p>Click to expand</p>
             </div>
           </div>
           <p
             v-else
             class="w-full text-center p-6 italic cursor-pointer opacity-75 hover:opacity-100 transition-all"
+            @click="editDesc = true"
           >
             Click to add a description
           </p>
         </div>
+        <div class="flex flex-col gap-1 w-full mb-2">
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-comments text-lg" />
+            Activity
+          </label>
+          <div class="px-8 py-4 border-l dark:border-surface-700 ml-2 group">
+            <div
+              v-for="(logData, index) in logs.slice(
+                0,
+                showFullActivity ? 15 : 5,
+              )"
+              :key="index"
+              class="flex items-center gap-2 my-2"
+            >
+              <i :class="`pi ${selectIcon(logData.action)} mr-4`" />
+              <Avatar :image="logData.avatar" shape="circle" />
+              <div>
+                <p>
+                  <span class="font-bold">{{ logData.full_name }}</span>
+                  {{ selectAction(logData, parentBoard) }}
+                </p>
+                <p class="text-xs">
+                  {{ formatDate(logData.created_at, true) }}
+                </p>
+              </div>
+            </div>
+            <div v-if="!showFullActivity" class="relative">
+              <Button
+                fluid
+                label="Show full activity"
+                variant="text"
+                class="!bg-surface-50 dark:!bg-surface-800 mt-2 z-10 transition-all group-hover:!brightness-90 dark:group-hover:!brightness-110"
+                @click="showFullActivity = true"
+              />
+              <span
+                class="absolute w-full h-[200%] bottom-0 left-0 bg-gradient-to-t from-surface-0 dark:from-surface-900 from-60% to-transparent"
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <div class="md:col-span-2">
         <div class="flex flex-col gap-1 w-full mb-2">
-          <label for="parentList">Parent list</label>
-          <Select
-            name="parentList"
-            placeholder="Select a list"
-            fluid
-            :options="parentBoard.lists"
-            option-label="title"
-            option-value="id"
-            :default-value="card.parent_list"
-            :disabled="parentBoard.current_user_role === 'reader'"
-            @value-change="(value) => moveCard(value)"
-          />
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-users text-lg" />
+            Participants
+          </label>
+          <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
+            <div v-if="participants.length > 0" class="flex items-center gap-1">
+              <AvatarGroup>
+                <Avatar
+                  v-for="user in participants"
+                  :key="user.id"
+                  :image="user.avatar"
+                  shape="circle"
+                  class="!h-6 !w-6"
+                />
+              </AvatarGroup>
+              <p>
+                <span class="font-semibold">
+                  {{ participants[0].full_name }}
+                </span>
+                {{
+                  participants.length > 1
+                    ? ` and ${participants.length - 1} other${participants.length > 2 ? "s" : ""}`
+                    : ""
+                }}
+              </p>
+            </div>
+          </div>
         </div>
+        <div class="flex flex-col gap-1 w-full mb-2">
+          <label class="flex items-center gap-2 font-semibold text-xl">
+            <i class="pi pi-wrench text-lg" />
+            Actions
+          </label>
+          <div class="py-4 pl-4 ml-2 border-l dark:border-surface-700">
+            <div class="flex flex-col gap-1 w-full mb-2">
+              <label for="assignedTo">Assigned to</label>
+              <Select
+                name="assignedTo"
+                placeholder="Select a member to assign"
+                fluid
+                :options="allMembers"
+                :default-value="
+                  allMembers.find((m) => m.user_id === card.assigned_to)
+                "
+                :disabled="parentBoard.current_user_role === 'reader'"
+                show-clear
+                @value-change="
+                  (value) => updateAssigned(value ? value.user_id : null)
+                "
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center">
+                    <Avatar
+                      v-if="option.avatar"
+                      :image="option.avatar"
+                      shape="circle"
+                      class="!h-6 !w-6 mr-1"
+                    />
+                    <p>{{ option.full_name }}</p>
+                  </div>
+                </template>
+                <template #value="{ value }">
+                  <div v-if="value" class="flex items-center">
+                    <Avatar
+                      :image="value.avatar"
+                      shape="circle"
+                      class="!h-6 !w-6 mr-1"
+                    />
+                    <p>{{ value.full_name }}</p>
+                  </div>
+                </template>
+              </Select>
+            </div>
 
-        <div class="flex flex-col gap-1 w-full">
-          <label for="labels">Labels</label>
-          <MultiSelect
-            display="chip"
-            :options="parentBoard.labels"
-            option-label="label"
-            option-value="id"
-            filter
-            fluid
-            placeholder="Select labels"
-            name="labels"
-            :max-selected-labels="2"
-            :default-value="card.labels.map((l) => l.label_id)"
-            :disabled="parentBoard.current_user_role === 'reader'"
-            @value-change="(value) => editLabels(value)"
-          />
+            <div class="flex flex-col gap-1 w-full mb-2">
+              <label for="parentList">Parent list</label>
+              <Select
+                name="parentList"
+                placeholder="Select a list"
+                fluid
+                :options="parentBoard.lists"
+                option-label="title"
+                option-value="id"
+                :default-value="card.parent_list"
+                :disabled="parentBoard.current_user_role === 'reader'"
+                @value-change="(value) => moveCard(value)"
+              />
+            </div>
+
+            <div class="flex flex-col gap-1 w-full">
+              <label for="labels">Labels</label>
+              <MultiSelect
+                display="chip"
+                :options="parentBoard.labels"
+                option-label="label"
+                option-value="id"
+                filter
+                fluid
+                placeholder="Select labels"
+                name="labels"
+                :max-selected-labels="2"
+                :default-value="card.labels.map((l) => l.label_id)"
+                :disabled="parentBoard.current_user_role === 'reader'"
+                @value-change="(value) => editLabels(value)"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2 w-full mt-6">
+              <Button
+                fluid
+                :icon="cardLinkCopied ? 'pi pi-check' : 'pi pi-share-alt'"
+                :label="cardLinkCopied ? 'Link copied to clipboard' : 'Share'"
+                class="!justify-start"
+                variant="outlined"
+                @click="shareCard"
+              />
+              <Button
+                fluid
+                :disabled="parentBoard.current_user_role === 'reader'"
+                icon="pi pi-trash"
+                label="Delete"
+                class="!border-red-500 !text-red-500 !justify-start"
+                variant="outlined"
+                @click="deleteCard"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
