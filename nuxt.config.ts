@@ -59,6 +59,7 @@ export default defineNuxtConfig({
     experimental: {
       openAPI: true,
       websocket: true,
+      tasks: true,
     },
     openAPI: {
       meta: {
@@ -82,6 +83,9 @@ export default defineNuxtConfig({
       options: {
         target: "esnext",
       },
+    },
+    scheduledTasks: {
+      "0 0 * * *": ["delete_expired_invites"],
     },
   },
   runtimeConfig: {

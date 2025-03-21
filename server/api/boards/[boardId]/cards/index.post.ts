@@ -65,11 +65,9 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  const cardId = uuid();
-
   const newCard = await prisma.board_cards.create({
     data: {
-      id: cardId,
+      id: uuid(),
       title: body.title,
       description: body.description,
       parent_list: body.parentList,
@@ -91,6 +89,18 @@ export default defineEventHandler(async (event) => {
           label_id: true,
         },
       },
+    },
+  });
+
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      parent_card_id: newCard.id,
+      action: "card_created",
+      created_by: user.id,
+      linked_value: newCard.parent_list,
+      new_value: newCard.title,
     },
   });
 

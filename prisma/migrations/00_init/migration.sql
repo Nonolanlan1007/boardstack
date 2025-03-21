@@ -2,10 +2,11 @@
 CREATE TABLE `board_cards` (
     `id` CHAR(36) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
-    `description` VARCHAR(255) NULL,
+    `description` LONGTEXT NULL,
     `parent_list` CHAR(36) NOT NULL,
     `position` INTEGER NOT NULL,
     `created_by` CHAR(36) NOT NULL,
+    `assigned_to` CHAR(36) NULL,
     `created_at` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` TIMESTAMP(0) NULL,
 

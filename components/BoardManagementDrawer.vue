@@ -11,6 +11,7 @@ const toast = useToast();
 const { copy } = useClipboard();
 const route = useRoute();
 const boardsStore = useBoardsStore();
+const confirm = useConfirm();
 
 /**
  * 0 -> Default menu
@@ -24,6 +25,7 @@ const boardsStore = useBoardsStore();
 const boardDrawerStep = ref<number>(0);
 const newBoardName = ref<string>("");
 const isLoading = ref<boolean>(false);
+const logs = ref<ActivityLog[]>([]);
 const unsplashQuery = ref<string>("");
 const unsplashResults = ref<{ query: string; results: any[] }>({
   query: "",
@@ -32,10 +34,47 @@ const unsplashResults = ref<{ query: string; results: any[] }>({
 const labelsTableFilters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
+const isActivityDialogOpen = ref<boolean>(false);
 
 const backgroundColor = computed(() =>
   getBackgroundColor(props.board.background),
 );
+
+const confirmBoardDeletion = () => {
+  confirm.require({
+    group: "actionToBeConfirmed",
+    message: "This action cannot be undone and will immediately take effect!",
+    header: "Are you sure you want to proceed?",
+    rejectProps: {
+      label: "Cancel",
+      severity: "secondary",
+      text: true,
+    },
+    acceptProps: {
+      label: "Delete Board",
+      severity: "danger",
+      text: true,
+    },
+    accept: async () => {
+      const res = await fetch(`/api/boards/${route.params.boardId}`, {
+        method: "DELETE",
+      }).catch((res) => res);
+
+      if (!res.ok) {
+        const data = await res.json();
+
+        return toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: `${res.status} - ${data.message}`,
+          life: 5000,
+        });
+      }
+
+      setTimeout(() => window.open("/app", "_self"), 200);
+    },
+  });
+};
 
 function copyBoardId() {
   copy(props.board.id);
@@ -407,6 +446,27 @@ async function deleteMember(memberId: string) {
     life: 3000,
   });
 }
+
+async function refreshLogs() {
+  isLoading.value = true;
+  const res = await fetch(
+    `/api/boards/${route.params.boardId}/activity?start=0&count=3`,
+  );
+  isLoading.value = false;
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: `${res.status} - ${data.message}`,
+      life: 5000,
+    });
+  }
+
+  logs.value = data.logs;
+}
 </script>
 
 <template>
@@ -424,6 +484,7 @@ async function deleteMember(memberId: string) {
         };
       }
     "
+    @show="refreshLogs"
   >
     <template #header>
       <Button
@@ -531,13 +592,34 @@ async function deleteMember(memberId: string) {
         </div>
         <div class="my-6">
           <h3 class="text-xl font-semibold">Activity</h3>
-          <p class="mb-6 opacity-50 italic text-center w-full">
-            Nothing to show here...
-          </p>
+          <Accordion v-if="!isLoading && logs.length > 0">
+            <LogAccordion
+              v-for="(logData, index) in logs"
+              :key="index"
+              :log-data="logData"
+              :index="index"
+              :board="board"
+            />
+          </Accordion>
+          <div
+            v-else-if="!isLoading"
+            class="flex items-center justify-center my-8"
+          >
+            <p>No recent activity</p>
+          </div>
+          <div v-else class="flex items-center justify-center my-8">
+            <i class="pi pi-spinner animate-spin" />
+          </div>
+          <BoardDrawerButton @click="isActivityDialogOpen = true">
+            <template #icon>
+              <i class="pi pi-history w-8" />
+            </template>
+            <template #default> Open Activity </template>
+          </BoardDrawerButton>
         </div>
         <div v-if="board.current_user_role === 'owner'" class="my-6">
           <h3 class="text-xl font-semibold">Danger Zone</h3>
-          <BoardDrawerButton variant="danger">
+          <BoardDrawerButton variant="danger" @click="confirmBoardDeletion()">
             <template #icon>
               <i class="pi pi-trash w-8" />
             </template>
@@ -1030,4 +1112,11 @@ async function deleteMember(memberId: string) {
       </div>
     </Transition>
   </Drawer>
+
+  <ConfirmDialog group="actionToBeConfirmed" />
+
+  <LazyActivityExplorerDialog
+    v-model:is-activity-dialog-open="isActivityDialogOpen"
+    :board="board"
+  />
 </template>

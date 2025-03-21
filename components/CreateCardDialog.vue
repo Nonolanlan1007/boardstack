@@ -13,6 +13,8 @@ function createCardResolver({ values }: FormSubmitEvent) {
   const errors: { [key: string]: { message: string }[] } = {};
 
   if (!values.title) errors.title = [{ message: "Title is required" }];
+  if (values.title.length > 50)
+    errors.title = [{ message: "Title is too long" }];
   if (!values.parentList)
     errors.parentList = [{ message: "Parent List is required" }];
 

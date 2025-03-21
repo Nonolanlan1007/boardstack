@@ -7,7 +7,9 @@ const route = useRoute();
 const colorMode = useColorMode();
 const toast = useToast();
 
-const { user } = useUserStore();
+const { user, fetchUser } = useUserStore();
+
+await callOnce(async () => await fetchUser());
 
 const { data: invitationData, error: invitationFetchError } = useFetch(
   `/api/invitations/${route.params.invitationId}`,
@@ -118,7 +120,8 @@ async function rejectInvitation() {
               You have been invited to join {{ invitationData.board_title }}
             </h1>
             <h2 class="text-sm text-center">
-              You're signed in as {{ user!.full_name }}
+              You're signed in as
+              {{ user ? user.full_name : "Unknown" }}
             </h2>
           </div>
 

@@ -108,6 +108,16 @@ export default defineEventHandler(async (event) => {
     true,
   );
 
+  await prisma.activity_logs.create({
+    data: {
+      id: uuid(),
+      parent_board_id: boardId,
+      action: "invitation_created",
+      created_by: user.id,
+      new_value: body.email,
+    },
+  });
+
   broadcastSSE(
     `boards/${boardId}`,
     JSON.stringify({

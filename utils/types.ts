@@ -16,6 +16,7 @@ export type DetailedBoard = boards & {
   updated_at: string;
   members: BoardMember[];
   current_user_role: MemberRole;
+  owner: Omit<BoardMember, "role">;
 };
 export type BoardCard = board_cards & { labels: { label_id: string }[] };
 export type BoardList = board_lists & { cards: BoardCard[] };
@@ -30,4 +31,19 @@ export type SummarizedBoard = boards & {
 };
 export interface UserProfile extends Omit<users, "password"> {
   avatar: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  parent_board_id: string | null;
+  parent_card_id: string | null;
+  action: string;
+  created_by: string;
+  old_value: string | null;
+  new_value: string | null;
+  linked_value: string | null;
+  full_name: string;
+  avatar: string;
+  created_at: string;
+  updated_at: string;
 }

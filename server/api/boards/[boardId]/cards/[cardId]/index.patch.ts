@@ -1,6 +1,8 @@
 import prisma from "~/lib/prisma";
 import { z } from "zod";
 import { broadcastSSE } from "~/server/api/events/index.get";
+import type { activity_logsCreateManyInput } from "@prisma/client";
+import { v4 as uuid } from "uuid";
 
 const paramsSchema = z.object({
   boardId: z.string(),
@@ -13,6 +15,7 @@ const bodySchema = z.object({
   title: z.string().trim().max(50).optional(),
   description: z.string().nullable().optional(),
   labels: z.array(z.string()).optional(),
+  assigned_to: z.string().nullable().optional(),
 });
 
 export default defineEventHandler(async (event) => {
@@ -29,12 +32,13 @@ export default defineEventHandler(async (event) => {
     body.position === undefined &&
     !body.title &&
     body.description === undefined &&
+    body.assigned_to === undefined &&
     !body.labels
   )
     return createError({
       statusCode: 400,
       message:
-        "One of the following fields are required: `title`, `description`, `position`, `parent_list` or `labels`",
+        "One of the following fields are required: `title`, `description`, `position`, `parent_list`, `assigned_to` or `labels`",
     });
 
   const user = await auth.user(event);
@@ -119,14 +123,26 @@ export default defineEventHandler(async (event) => {
       });
   }
 
+  if (body.assigned_to && body.assigned_to !== user.id) {
+    const member = await prisma.board_members.findFirst({
+      where: { user_id: body.assigned_to, parent_board: boardId },
+    });
+
+    if (!member)
+      throw createError({
+        statusCode: 404,
+        message: "Member not found",
+      });
+  }
+
   const newCard = await prisma.board_cards.update({
     where: { id: cardId },
     data: {
       ...(body.title && { title: body.title }),
-      ...(body.description && { description: body.description }),
+      ...(body.description !== undefined && { description: body.description }),
       ...(body.parent_list && { parent_list: body.parent_list }),
       ...(body.position !== undefined && { position: body.position }),
-      ...(body.title && { title: body.title }),
+      ...(body.assigned_to !== undefined && { assigned_to: body.assigned_to }),
     },
     include: {
       labels: {
@@ -135,6 +151,47 @@ export default defineEventHandler(async (event) => {
         },
       },
     },
+  });
+
+  const actions: Omit<
+    activity_logsCreateManyInput,
+    "id" | "parent_board_id" | "created_by"
+  >[] = [];
+
+  if (card.title !== newCard.title)
+    actions.push({
+      action: "renamed_card",
+      old_value: card.title,
+      new_value: newCard.title,
+    });
+
+  if (card.description !== newCard.description)
+    actions.push({
+      action: "update_card_description",
+    });
+
+  if (card.parent_list !== newCard.parent_list)
+    actions.push({
+      action: "moved_card",
+      old_value: card.parent_list,
+      new_value: newCard.parent_list,
+    });
+
+  if (card.assigned_to !== newCard.assigned_to)
+    actions.push({
+      action: "update_assigned_to_card",
+      old_value: card.assigned_to,
+      new_value: newCard.assigned_to,
+    });
+
+  await prisma.activity_logs.createMany({
+    data: actions.map((action) => ({
+      ...action,
+      id: uuid(),
+      parent_board_id: boardId,
+      parent_card_id: cardId,
+      created_by: user.id,
+    })) as activity_logsCreateManyInput[],
   });
 
   broadcastSSE(
