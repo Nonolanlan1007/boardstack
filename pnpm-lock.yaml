@@ -28,7 +28,7 @@ importers:
         version: 1.0.0
       '@primevue/forms':
         specifier: ^4.2.5
-        version: 4.3.1(vue@3.5.13(typescript@5.8.2))
+        version: 4.3.2(vue@3.5.13(typescript@5.8.2))
       '@prisma/client':
         specifier: 6.5.0
         version: 6.5.0(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2)
@@ -1182,8 +1182,14 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
-  '@primevue/forms@4.3.1':
-    resolution: {integrity: sha512-2IWIrRCV82ey7fUb0dQhnJX8iqddcyZNajsEQpRMw1MO8NchN+vT26H2H1AYDI5uwwmv1FCqr+MiU9wk39Ub2g==}
+  '@primevue/core@4.3.2':
+    resolution: {integrity: sha512-8ghF6PdYKw77rLFZRl8C8kLHMKFMPg8f7xiPQIvLG0Cxl+FKsBrGp0xQxnEXsp2+6NX3Pv1jysrQjxSnuufz4w==}
+    engines: {node: '>=12.11.0'}
+    peerDependencies:
+      vue: ^3.5.0
+
+  '@primevue/forms@4.3.2':
+    resolution: {integrity: sha512-9pAIPONNiTndGLGMp4d5TONC17VpheCiNMekwJIzxbZ1KYIfoDn/+yhwmK5n267g7ZFdMIAmz6KtH8dG+YgSsA==}
     engines: {node: '>=12.11.0'}
 
   '@primevue/icons@4.3.1':
@@ -7754,11 +7760,17 @@ snapshots:
       '@primeuix/utils': 0.5.1
       vue: 3.5.13(typescript@5.8.2)
 
-  '@primevue/forms@4.3.1(vue@3.5.13(typescript@5.8.2))':
+  '@primevue/core@4.3.2(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@primeuix/styled': 0.5.0
+      '@primeuix/utils': 0.5.1
+      vue: 3.5.13(typescript@5.8.2)
+
+  '@primevue/forms@4.3.2(vue@3.5.13(typescript@5.8.2))':
     dependencies:
       '@primeuix/forms': 0.0.4
       '@primeuix/utils': 0.5.1
-      '@primevue/core': 4.3.1(vue@3.5.13(typescript@5.8.2))
+      '@primevue/core': 4.3.2(vue@3.5.13(typescript@5.8.2))
     transitivePeerDependencies:
       - vue
 
